@@ -13,6 +13,7 @@ import {
   swapTiles,
   type PendingPlacement,
 } from '../game/wordBattleEngine';
+import { calculateFinalScores, hasPassEnded } from '../game/gameEnd';
 import type { Tile, PlacedWord } from '../types';
 
 /**
@@ -88,22 +89,33 @@ export default function GamePage() {
     return () => clearInterval(timer);
   }, [wordBattle, room, localPlayer, requestSync]);
 
-  // Deteksi akhir permainan: stock habis DAN ada pemain yang rack-nya kosong.
-  // Pemenang = skor tertinggi. Modal game over ditampilkan sekali.
+  // Akhir permainan: rack kosong setelah stock habis, atau deadlock (2 putaran penuh pass).
+  // Kedua kondisi menerapkan pengurangan nilai tile tersisa; yang menghabiskan rack
+  // juga mendapat bonus sejumlah total tile lawan.
   useEffect(() => {
-    if (!wordBattle || !room || wordBattle.winnerId) return;
-    const stockEmpty = wordBattle.stock.length === 0;
-    const someoneFinished = room.players.some((p) => p.rack.length === 0);
-    if (!stockEmpty || !someoneFinished || room.players.length === 0) return;
+    if (!wordBattle || !room || wordBattle.winnerId || room.players.length === 0) return;
 
-    const ranked = [...room.players].sort((a, b) => b.score - a.score);
-    const top = ranked[0];
-    const winnerId = top?.id || null;
-    const winnerNames = ranked.filter((p) => p.score === top?.score).map((p) => p.name);
+    const finishingPlayer = wordBattle.stock.length === 0
+      ? room.players.find((player) => player.rack.length === 0)
+      : undefined;
+    const endedByEmptyRack = Boolean(finishingPlayer);
+    const endedByPasses = hasPassEnded(wordBattle.consecutivePassRounds, room.players.length);
+    if (!endedByEmptyRack && !endedByPasses) return;
 
-    setWordBattle({ ...wordBattle, winnerId, winnerNames });
+    const finalPlayers = calculateFinalScores(room.players, finishingPlayer?.id ?? null);
+    const topScore = Math.max(...finalPlayers.map((player) => player.score));
+    const winnerNames = finalPlayers
+      .filter((player) => player.score === topScore)
+      .map((player) => player.name);
+    const winnerId = finalPlayers.find((player) => player.score === topScore)?.id ?? null;
+    const finalRoom = { ...room, players: finalPlayers };
+    const finalWordBattle = { ...wordBattle, winnerId, winnerNames };
+
+    setRoom(finalRoom);
+    setWordBattle(finalWordBattle);
+    broadcastGameState(finalWordBattle, finalRoom);
     setShowGameOver(true);
-  }, [wordBattle, room, setWordBattle]);
+  }, [wordBattle, room, setRoom, setWordBattle, broadcastGameState]);
 
   // Auto-ganti giliran saat waktu turn habis.
   // Hanya klien pemain yang sedang giliran yang mengeksekusi (mencegah dobel-advance).
@@ -129,6 +141,7 @@ export default function GamePage() {
         ...wb,
         currentPlayerId: nextPlayerId,
         turnStartTime: Date.now(),
+        consecutivePassRounds: wb.consecutivePassRounds + 1,
       };
       setWordBattle(updated);
       setPendingPlacements([]);
@@ -231,6 +244,7 @@ export default function GamePage() {
       stock: newStock,
       currentPlayerId: nextPlayerId,
       turnStartTime: Date.now(),
+      consecutivePassRounds: 0,
     };
 
     setRoom({ ...room, players: updatedPlayers });
