@@ -5,6 +5,7 @@ import type {
   GameType,
   GameSettings,
   WordBattleState,
+  ConnectionStatus,
 } from '../types';
 import { generateRoomCode, generateId } from '../utils';
 
@@ -12,6 +13,8 @@ interface GameState {
   // Connection
   localPlayer: Player | null;
   room: Room | null;
+  /** Status koneksi realtime — dipakai untuk badge "Menyambungkan ulang". */
+  connectionStatus: ConnectionStatus;
 
   // Word Battle specific
   wordBattle: WordBattleState | null;
@@ -24,6 +27,7 @@ interface GameState {
   setRoom: (room: Room | null) => void;
   setLocalPlayer: (player: Player | null) => void;
   setWordBattle: (state: WordBattleState | null) => void;
+  setConnectionStatus: (status: ConnectionStatus) => void;
 }
 
 const defaultSettings: GameSettings = {
@@ -35,6 +39,7 @@ const defaultSettings: GameSettings = {
 export const useGameStore = create<GameState>((set) => ({
   localPlayer: null,
   room: null,
+  connectionStatus: 'connecting',
   wordBattle: null,
 
   createRoom: (name, settings) => {
@@ -93,4 +98,5 @@ export const useGameStore = create<GameState>((set) => ({
   setRoom: (room) => set({ room }),
   setLocalPlayer: (player) => set({ localPlayer: player }),
   setWordBattle: (wordBattle) => set({ wordBattle }),
+  setConnectionStatus: (connectionStatus) => set({ connectionStatus }),
 }));

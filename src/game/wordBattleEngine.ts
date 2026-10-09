@@ -58,11 +58,19 @@ export function initWordBattle(players: Player[]): {
     };
   });
 
+  // Urutan giliran diacak SEKALI di sini oleh host, lalu ikut tersinkron
+  // lewat wordBattle.turnOrder. Semua pemain memakai urutan yang sama.
+  const turnOrder = updatedPlayers.map((p) => p.id);
+  for (let i = turnOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [turnOrder[i], turnOrder[j]] = [turnOrder[j], turnOrder[i]];
+  }
+
   const state: WordBattleState = {
     board,
-    // Pemain pertama = yang paling awal join (deterministik di semua tab)
-    currentPlayerId:
-      [...updatedPlayers].sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0))[0]?.id || '',
+    // Pemain pertama = hasil acak, bukan selalu yang paling awal join.
+    currentPlayerId: turnOrder[0] || '',
+    turnOrder,
     turnStartTime: Date.now(),
     stock,
     consecutivePassRounds: 0,

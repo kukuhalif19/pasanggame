@@ -2,7 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { getRealtime } from '../services/supabaseRealtime';
 import { dedupePlayers } from '../utils';
-import type { Player, Room, RealtimeEvent } from '../types';
+import type { Player, Room, RealtimeEvent, ConnectionStatus } from '../types';
 
 export function useRoomSync(roomCode: string | undefined) {
   const localPlayer = useGameStore((state) => state.localPlayer);
@@ -10,6 +10,7 @@ export function useRoomSync(roomCode: string | undefined) {
   const setLocalPlayer = useGameStore((state) => state.setLocalPlayer);
   const startGame = useGameStore((state) => state.startGame);
   const setWordBattle = useGameStore((state) => state.setWordBattle);
+  const setConnectionStatus = useGameStore((state) => state.setConnectionStatus);
 
   const realtimeRef = useRef<ReturnType<typeof getRealtime> | null>(null);
 
@@ -125,15 +126,16 @@ export function useRoomSync(roomCode: string | undefined) {
   }, [roomCode, localPlayer?.id, setLocalPlayer, setRoom, setWordBattle, startGame]);
 
   // Handshake join untuk GUEST: announce sampai benar-benar tersinkron.
-  // BroadcastChannel tidak menyimpan history, jadi kalau host belum mendengarkan
+  // Supabase Broadcast tidak menyimpan history, jadi kalau host belum mendengarkan
   // saat kita broadcast, event-nya hilang. Retry menutup race ini.
+  // Kirim hanya saat channel sudah 'connected' — send() mengembalikan false kalau belum.
   useEffect(() => {
     if (!roomCode || !localPlayer || localPlayer.isHost) return;
 
     let attempts = 0;
     const announce = (): boolean => {
       const rt = realtimeRef.current;
-      if (!rt) return false;
+      if (!rt || !rt.isReady()) return false;
       const r = useGameStore.getState().room;
       const me = useGameStore.getState().localPlayer;
       if (!me) return false;
@@ -155,6 +157,34 @@ export function useRoomSync(roomCode: string | undefined) {
 
     return () => clearInterval(timer);
   }, [roomCode, localPlayer?.id]);
+
+  // Status koneksi → store, dan RESYNC otomatis saat koneksi pulih.
+  // Ini yang menutup kasus "ganti jaringan": saat channel SUBSCRIBED lagi,
+  // kita minta state terbaru dari host supaya board/skor/giliran tidak tertinggal.
+  useEffect(() => {
+    if (!roomCode || !localPlayer) return;
+    const rt = realtimeRef.current;
+    if (!rt) return;
+
+    let shouldResync = false;
+    const unsub = rt.onStatus((status: ConnectionStatus) => {
+      setConnectionStatus(status);
+      if (status === 'connected') {
+        if (shouldResync) {
+          const me = useGameStore.getState().localPlayer;
+          if (me) {
+            rt.send('REQUEST_SYNC', { playerId: me.id }, me.id);
+          }
+          shouldResync = false;
+        }
+      } else {
+        // Putus / sedang menyambung ulang → permintaan sync berikutnya menandai resync.
+        shouldResync = true;
+      }
+    });
+
+    return unsub;
+  }, [roomCode, localPlayer?.id, setConnectionStatus]);
 
   // Broadcast PLAYER_LEFT hanya saat tab benar-benar ditutup/di-refresh
   useEffect(() => {

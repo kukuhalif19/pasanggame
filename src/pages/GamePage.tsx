@@ -17,16 +17,36 @@ import { calculateFinalScores, hasPassEnded } from '../game/gameEnd';
 import type { Tile, PlacedWord } from '../types';
 
 /**
- * Hitung ID pemain berikutnya secara aman.
- * Urutan pemain diurutkan berdasarkan joinedAt sebelum diputar, supaya
- * urutan giliran SAMA di semua tab (tidak bergantung urutan array lokal).
+ * Hitung ID pemain berikutnya.
+ * Memakai `turnOrder` (urutan acak saat game dimulai, di-broadcast ke semua
+ * pemain) supaya urutan giliran SAMA di semua tab. Pemain yang sudah keluar
+ * dilewati; pemain yang belum ada di turnOrder ditambahkan di belakang.
+ * Kalau turnOrder tidak tersedia, fallback ke urutan join.
  */
-function getNextPlayerId(players: { id: string; joinedAt?: number }[], currentPlayerId: string): string {
+function getNextPlayerId(
+  players: { id: string; joinedAt?: number }[],
+  currentPlayerId: string,
+  turnOrder?: string[]
+): string {
   if (players.length === 0) return currentPlayerId;
-  const sorted = [...players].sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0));
-  const idx = sorted.findIndex((p) => p.id === currentPlayerId);
-  if (idx === -1) return sorted[0].id;
-  return sorted[(idx + 1) % sorted.length].id;
+  const active = new Set(players.map((p) => p.id));
+
+  let order: string[];
+  if (turnOrder && turnOrder.length > 0) {
+    order = turnOrder.filter((id) => active.has(id));
+    for (const p of players) {
+      if (!order.includes(p.id)) order.push(p.id);
+    }
+  } else {
+    order = [...players]
+      .sort((a, b) => (a.joinedAt || 0) - (b.joinedAt || 0))
+      .map((p) => p.id);
+  }
+
+  if (order.length === 0) return currentPlayerId;
+  const idx = order.indexOf(currentPlayerId);
+  if (idx === -1) return order[0];
+  return order[(idx + 1) % order.length];
 }
 
 export default function GamePage() {
@@ -38,6 +58,7 @@ export default function GamePage() {
   const setWordBattle = useGameStore((state) => state.setWordBattle);
   const setRoom = useGameStore((state) => state.setRoom);
   const leaveRoom = useGameStore((state) => state.leaveRoom);
+  const connectionStatus = useGameStore((state) => state.connectionStatus);
 
   const { broadcastGameState, requestSync, broadcastLeave } = useRoomSync(code);
 
@@ -149,7 +170,7 @@ export default function GamePage() {
       const elapsed = Math.floor((Date.now() - wb.turnStartTime) / 1000);
       if (elapsed < r.settings.turnTimerSeconds) return;
 
-      const nextPlayerId = getNextPlayerId(r.players, wb.currentPlayerId);
+      const nextPlayerId = getNextPlayerId(r.players, wb.currentPlayerId, wb.turnOrder);
       const updated = {
         ...wb,
         currentPlayerId: nextPlayerId,
@@ -251,7 +272,7 @@ export default function GamePage() {
     );
 
     // Next turn
-    const nextPlayerId = getNextPlayerId(room.players, wordBattle.currentPlayerId);
+    const nextPlayerId = getNextPlayerId(room.players, wordBattle.currentPlayerId, wordBattle.turnOrder);
 
     const updatedWordBattle = {
       ...wordBattle,
@@ -274,7 +295,7 @@ export default function GamePage() {
     if (pendingPlacements.length > 0 || !wordBattle) return;
     if (!currentPlayerIsMe) return;
 
-    const nextPlayerId = getNextPlayerId(room.players, wordBattle.currentPlayerId);
+    const nextPlayerId = getNextPlayerId(room.players, wordBattle.currentPlayerId, wordBattle.turnOrder);
 
     const updatedWordBattle = {
       ...wordBattle,
@@ -378,7 +399,7 @@ export default function GamePage() {
     );
 
     // 4. Giliran ke player berikutnya
-    const nextPlayerId = getNextPlayerId(room.players, wordBattle.currentPlayerId);
+    const nextPlayerId = getNextPlayerId(room.players, wordBattle.currentPlayerId, wordBattle.turnOrder);
 
     // 5. Update state
     setRoom({ ...room, players: updatedPlayers });
@@ -442,6 +463,15 @@ export default function GamePage() {
         </button>
         <span className="text-[10px] font-mono font-bold text-[#A78BFA]">ROOM: {code}</span>
       </div>
+
+      {/* Indikator koneksi: hanya tampil kalau tidak normal, supaya tidak berisik */}
+      {connectionStatus !== 'connected' && (
+        <div className="w-full max-w-[440px] mb-2 px-3 py-1.5 rounded-lg bg-[#F97316]/15 border border-[#F97316]/40 text-[#FDBA74] text-[11px] font-semibold text-center animate-fadeIn">
+          {connectionStatus === 'disconnected'
+            ? '⚠ Koneksi terputus — menunggu jaringan…'
+            : '🔄 Menyambungkan ulang…'}
+        </div>
+      )}
       <GameHeader
         players={room.players}
         currentPlayerId={wordBattle.currentPlayerId}

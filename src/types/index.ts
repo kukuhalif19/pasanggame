@@ -52,6 +52,8 @@ export interface GameSettings {
 export interface WordBattleState {
   board: BoardCell[][];
   currentPlayerId: string;
+  /** Urutan giliran (acak saat mulai). Dibuat sekali oleh host lalu di-broadcast. */
+  turnOrder: string[];
   turnStartTime: number;
   stock: Tile[];
   consecutivePassRounds: number;
@@ -61,6 +63,13 @@ export interface WordBattleState {
   winnerId: string | null;
   winnerNames: string[] | null;
 }
+
+/** Status koneksi realtime ke server. */
+export type ConnectionStatus =
+  | 'connecting'
+  | 'connected'
+  | 'reconnecting'
+  | 'disconnected';
 
 export interface PlacedWord {
   word: string;
