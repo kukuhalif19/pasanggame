@@ -220,6 +220,43 @@ export function calculateScore(
     return { score: 0, isValidPlacement: false, message: 'Huruf harus diletakkan dalam satu garis lurus' };
   }
 
+  // Larangan celah: antar tile yang diletakkan dalam satu langkah (dan tile yang
+  // sudah ada di papan di antara keduanya) TIDAK boleh ada petak kosong.
+  // Contoh gagal: B di r5, lalu A di r7 dan H di r8 (r6 kosong) — kata terputus.
+  if (placements.length > 1) {
+    if (isHorizontal) {
+      const r = placements[0].row;
+      const minCol = Math.min(...placements.map((p) => p.col));
+      const maxCol = Math.max(...placements.map((p) => p.col));
+      for (let c = minCol; c <= maxCol; c++) {
+        const hasPending = placements.some((p) => p.col === c);
+        const hasBoard = board[r][c].tile !== null;
+        if (!hasPending && !hasBoard) {
+          return {
+            score: 0,
+            isValidPlacement: false,
+            message: 'Huruf tidak boleh terputus — ada petak kosong di antara huruf yang diletakkan',
+          };
+        }
+      }
+    } else if (isVertical) {
+      const c = placements[0].col;
+      const minRow = Math.min(...placements.map((p) => p.row));
+      const maxRow = Math.max(...placements.map((p) => p.row));
+      for (let r = minRow; r <= maxRow; r++) {
+        const hasPending = placements.some((p) => p.row === r);
+        const hasBoard = board[r][c].tile !== null;
+        if (!hasPending && !hasBoard) {
+          return {
+            score: 0,
+            isValidPlacement: false,
+            message: 'Huruf tidak boleh terputus — ada petak kosong di antara huruf yang diletakkan',
+          };
+        }
+      }
+    }
+  }
+
   const isFirstMove = board.every((row) => row.every((cell) => cell.tile === null));
   if (isFirstMove) {
     const touchesCenter = placements.some((p) => p.row === CENTER_INDEX && p.col === CENTER_INDEX);
