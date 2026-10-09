@@ -51,6 +51,19 @@ export default function GamePage() {
   const [showSwapModal, setShowSwapModal] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
 
+  // Bersihkan tile yang sedang disiapkan saat giliran berpindah ke pemain lain.
+  // Ini mencegah tile "menggantung" yang bisa membingungkan pemain.
+  // Effect ini diletakkan SEBELUM early return untuk mematuhi aturan React hooks.
+  useEffect(() => {
+    if (!wordBattle || !localPlayer) return;
+    const isMyTurn = wordBattle.currentPlayerId === localPlayer.id;
+    if (!isMyTurn && pendingPlacements.length > 0) {
+      setPendingPlacements([]);
+      setSelectedRackTile(null);
+      setBlankPlacementTarget(null);
+    }
+  }, [wordBattle?.currentPlayerId, localPlayer?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!wordBattle && room && localPlayer && localPlayer.isHost) {
       const { state, updatedPlayers } = initWordBattle(room.players);
@@ -183,8 +196,11 @@ export default function GamePage() {
   const availableRack = myRack.filter((t) => !pendingTileIds.has(t.id));
 
   const handleBoardCellClick = (row: number, col: number) => {
-    // Semua pemain boleh menyiapkan kata di papan lokal sebelum gilirannya.
-    // Hanya tombol submit yang tetap terkunci sampai giliran pemain tersebut tiba.
+    // Hanya pemain yang sedang giliran yang boleh menaruh tile ke papan.
+    // Jika diizinkan sebelum giliran, tile yang sudah disiapkan bisa
+    // tertimpa oleh pemain lain saat giliran mereka (karena pendingPlacements
+    // bersifat lokal dan tidak di-broadcast ke pemain lain).
+    if (!currentPlayerIsMe) return;
     if (!selectedRackTile) return;
     const cell = wordBattle.board[row][col];
     if (cell.tile) return;

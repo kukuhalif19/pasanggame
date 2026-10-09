@@ -139,7 +139,7 @@ export default function Rack({
         {/* Status message saat bukan giliran */}
         {!isMyTurn && (
           <p className="text-center text-xs text-[var(--color-text-muted)]">
-            ✋ Bukan giliranmu — kamu tetap bisa memilih & mengacak huruf, tapi belum bisa menaruhnya di papan
+            ✋ Bukan giliranmu — tunggu giliranmu untuk menaruh huruf ke papan
           </p>
         )}
       </div>

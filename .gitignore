@@ -25,3 +25,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+kbbi_full.csv
+kbbi_missing.txt
+batch_*.txt
+dictionary.ts.bak
