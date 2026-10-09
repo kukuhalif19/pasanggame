@@ -143,7 +143,8 @@ tersimpan di room → tidak bisa berubah mid-game. Backward-compatible: default 
 1. **Lobby Join Visibility**: Host sekarang otomatis membalas dan broadcast ulang `SYNC_ROOM_STATE` setelah koneksi realtime siap, sehingga saat guest bergabung ke mode ENG/MIX langsung terlihat di daftar pemain tanpa delay/hilang.
 2. **Rack Player Aman**: Ditambahkan handling race timeout (10 detik) saat memuat kamus TWL06 (chunk lazy-load), sehingga state game dan pembagian tile awal (rack) selalu dieksekusi dan tidak pernah kosong/hang.
 3. **Display Bahasa di Lobby**: Memastikan `room.settings.language` tersinkron penuh ke store saat guest bergabung, sehingga label bahasa yang tampil di lobby konsisten (IND / ENG / MIX).
-4. **Validasi Kata ENG/MIX**: Mode ENG memakai TWL06 (178.691 kata), MIX memakai gabungan KBBI + TWL06 dengan skor huruf hybrid yang konsisten.
+4. **Validasi Kontinuitas Tile (Anti-Gap)**: Melarang meletakkan tile yang memiliki petak kosong (gap/celah) di antaranya dalam satu langkah (contoh: B di r5, loncat kosong r6, A di r7 dan H di r8). Validasi ini mengecek apakah semua petak dari min ke max sudah terisi tile baru atau tile yang sudah ada di papan sebelumnya.
+5. **Validasi Kata ENG/MIX**: Mode ENG memakai TWL06 (178.691 kata), MIX memakai gabungan KBBI + TWL06 dengan skor huruf hybrid yang konsisten.
 
 **Kamus terpisah (tidak tercampur):**
 - IND → `dictionary.ts` (KBBI v6.1.0, 123.463 kata, import statis ~1.5MB)
