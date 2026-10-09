@@ -96,7 +96,11 @@ export default function Lobby() {
         <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--color-surface)] border border-[#262633] mb-6 text-xs text-[var(--color-text-muted)]">
           <div className="flex items-center gap-1.5">
             <Clock size={16} className="text-[#F97316]" />
-            <span>Turn: {room?.settings.turnTimerSeconds || 60} detik</span>
+            <span>
+              {room?.settings.turnTimerSeconds === 0
+                ? 'Mode Casual (Tanpa Timer)'
+                : `Turn: ${room?.settings.turnTimerSeconds || 60} detik`}
+            </span>
           </div>
           <span className="text-[var(--color-text-muted)]">&bull;</span>
           <span>Bahasa Indonesia</span>

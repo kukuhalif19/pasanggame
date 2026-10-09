@@ -44,7 +44,7 @@ export type RoomState = 'lobby' | 'playing' | 'finished';
 export type GameType = 'word-battle' | 'this-or-that' | 'truth-or-dare';
 
 export interface GameSettings {
-  turnTimerSeconds: 30 | 60 | 90;
+  turnTimerSeconds: 0 | 30 | 60 | 90; // 0 = casual (tanpa batas waktu)
   maxSwapTiles: number;
   language: 'id';
 }

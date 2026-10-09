@@ -186,5 +186,11 @@ export function useRoomSync(roomCode: string | undefined) {
     }
   }, [localPlayer?.id]);
 
-  return { broadcastStartGame, broadcastGameState, requestSync };
+  const broadcastLeave = useCallback(() => {
+    if (realtimeRef.current && localPlayer?.id) {
+      realtimeRef.current.send('PLAYER_LEFT', localPlayer.id, localPlayer.id);
+    }
+  }, [localPlayer?.id]);
+
+  return { broadcastStartGame, broadcastGameState, requestSync, broadcastLeave };
 }

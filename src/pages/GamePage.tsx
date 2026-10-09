@@ -36,8 +36,9 @@ export default function GamePage() {
   const wordBattle = useGameStore((state) => state.wordBattle);
   const setWordBattle = useGameStore((state) => state.setWordBattle);
   const setRoom = useGameStore((state) => state.setRoom);
+  const leaveRoom = useGameStore((state) => state.leaveRoom);
 
-  const { broadcastGameState, requestSync } = useRoomSync(code);
+  const { broadcastGameState, requestSync, broadcastLeave } = useRoomSync(code);
 
   const [selectedRackTile, setSelectedRackTile] = useState<Tile | null>(null);
   const [pendingPlacements, setPendingPlacements] = useState<PendingPlacement[]>([]);
@@ -103,6 +104,51 @@ export default function GamePage() {
     setWordBattle({ ...wordBattle, winnerId, winnerNames });
     setShowGameOver(true);
   }, [wordBattle, room, setWordBattle]);
+
+  // Auto-ganti giliran saat waktu turn habis.
+  // Hanya klien pemain yang sedang giliran yang mengeksekusi (mencegah dobel-advance).
+  // Mode Casual (turnTimerSeconds === 0) tidak punya timer sama sekali.
+  useEffect(() => {
+    if (!wordBattle || !room) return;
+    const timerSeconds = room.settings.turnTimerSeconds;
+    if (!timerSeconds || timerSeconds <= 0) return; // casual: tanpa batas waktu
+    if (wordBattle.winnerId) return;
+
+    const tick = () => {
+      const wb = useGameStore.getState().wordBattle;
+      const r = useGameStore.getState().room;
+      const me = useGameStore.getState().localPlayer;
+      if (!wb || !r || !me || wb.winnerId) return;
+      // Hanya klien pemain yang giliran yang memajukan turn.
+      if (wb.currentPlayerId !== me.id) return;
+      const elapsed = Math.floor((Date.now() - wb.turnStartTime) / 1000);
+      if (elapsed < r.settings.turnTimerSeconds) return;
+
+      const nextPlayerId = getNextPlayerId(r.players, wb.currentPlayerId);
+      const updated = {
+        ...wb,
+        currentPlayerId: nextPlayerId,
+        turnStartTime: Date.now(),
+      };
+      setWordBattle(updated);
+      setPendingPlacements([]);
+      setSelectedRackTile(null);
+      setBlankPlacementTarget(null);
+      if (broadcastGameState) broadcastGameState(updated, r);
+    };
+
+    const interval = setInterval(tick, 500);
+    return () => clearInterval(interval);
+  }, [wordBattle, room, setWordBattle, broadcastGameState]);
+
+  // Keluar dari game: broadcast PLAYER_LEFT lalu bersihkan state dan kembali ke home.
+  // Ini menghindari loop redirect (Lobby otomatis balik ke game saat room.state==='playing').
+  const handleLeaveGame = () => {
+    if (!window.confirm('Keluar dari permainan? Kamu akan meninggalkan room ini.')) return;
+    if (broadcastLeave) broadcastLeave();
+    leaveRoom();
+    navigate('/');
+  };
 
   if (!wordBattle || !localPlayer || !room) {
     return (
@@ -298,7 +344,7 @@ export default function GamePage() {
     <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text-primary)] flex flex-col items-center justify-between py-4 px-2">
       <div className="w-full max-w-[440px] flex items-center justify-between mb-2">
         <button
-          onClick={() => navigate(`/room/${code}`)}
+          onClick={handleLeaveGame}
           className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-white"
         >
           <ArrowLeft size={16} /> Kembali

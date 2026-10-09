@@ -60,20 +60,26 @@ export default function GameHeader({
         </div>
 
         {/* Timer */}
-        <div className="flex items-center gap-1.5">
-          <Clock
-            size={18}
-            weight="bold"
-            className={timeLeft < 10 ? 'text-[#EF4444]' : 'text-[#F97316]'}
-          />
-          <span
-            className={`text-xl font-black font-mono ${
-              timeLeft < 10 ? 'text-[#EF4444]' : 'text-white'
-            }`}
-          >
-            {timeLeft}s
-          </span>
-        </div>
+        {turnTimerSeconds === 0 ? (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#10B981]/15 border border-[#10B981]/30 text-[#10B981]">
+            <span className="text-xs font-bold uppercase tracking-wider">Casual</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5">
+            <Clock
+              size={18}
+              weight="bold"
+              className={timeLeft < 10 ? 'text-[#EF4444]' : 'text-[#F97316]'}
+            />
+            <span
+              className={`text-xl font-black font-mono ${
+                timeLeft < 10 ? 'text-[#EF4444]' : 'text-white'
+              }`}
+            >
+              {timeLeft}s
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Scoreboard */}

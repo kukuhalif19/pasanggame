@@ -8,7 +8,7 @@ export default function CreateRoom() {
   const createRoom = useGameStore((state) => state.createRoom);
 
   const [name, setName] = useState('');
-  const [timerSeconds, setTimerSeconds] = useState<30 | 60 | 90>(60);
+  const [timerSeconds, setTimerSeconds] = useState<0 | 30 | 60 | 90>(60);
 
   const handleCreate = () => {
     if (!name.trim()) return;
@@ -51,26 +51,34 @@ export default function CreateRoom() {
           <label className="block text-sm font-semibold mb-3 text-[var(--color-text-primary)]">
             Durasi Turn Timer
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            {[30, 60, 90].map((sec) => (
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { val: 0, label: 'Casual', desc: 'No timer' },
+              { val: 30, label: '30s', desc: 'Cepat' },
+              { val: 60, label: '60s', desc: 'Normal' },
+              { val: 90, label: '90s', desc: 'Santai' },
+            ].map((item) => (
               <button
-                key={sec}
-                onClick={() => setTimerSeconds(sec as 30 | 60 | 90)}
-                className={`py-3 rounded-lg font-semibold text-sm transition-all relative ${
-                  timerSeconds === sec
+                key={item.val}
+                onClick={() => setTimerSeconds(item.val as 0 | 30 | 60 | 90)}
+                className={`py-3 rounded-lg font-semibold text-xs transition-all relative flex flex-col items-center justify-center ${
+                  timerSeconds === item.val
                     ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[#7C3AED]/30'
                     : 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] hover:bg-[#262633] border border-[#2D2D3B]'
                 }`}
               >
-                {timerSeconds === sec && (
-                  <Check size={16} weight="bold" className="absolute top-1.5 right-1.5" />
+                {timerSeconds === item.val && (
+                  <Check size={14} weight="bold" className="absolute top-1 right-1" />
                 )}
-                {sec}s
+                <span className="font-bold">{item.label}</span>
+                <span className="text-[10px] opacity-75">{item.desc}</span>
               </button>
             ))}
           </div>
           <p className="text-xs text-[var(--color-text-muted)] mt-2">
-            Setiap pemain punya {timerSeconds} detik untuk menyelesaikan gilirannya.
+            {timerSeconds === 0
+              ? 'Mode Casual: Tanpa batas waktu, bebas berdiskusi dan santai.'
+              : `Setiap pemain punya ${timerSeconds} detik untuk menyelesaikan gilirannya.`}
           </p>
         </div>
 
