@@ -9,6 +9,7 @@ interface RackProps {
   onSwapClick: () => void;
   onSkip: () => void;
   onRecall: () => void;
+  onRecallLast: () => void;
   onPlay: () => void;
   canPlay: boolean;
   hasPlacements: boolean;
@@ -23,6 +24,7 @@ export default function Rack({
   onSwapClick,
   onSkip,
   onRecall,
+  onRecallLast,
   onPlay,
   canPlay,
   hasPlacements,
@@ -66,13 +68,13 @@ export default function Rack({
         )}
       </div>
 
-      {/* Action Buttons: Shuffle, Swap, Skip, Recall, Play */}
+      {/* Action Buttons: Shuffle, Swap, Skip, Recall All, Recall Last, Play */}
       <div className="w-full flex flex-col gap-2">
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-1.5">
           {/* Shuffle */}
           <button
             onClick={onShuffle}
-            className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[var(--color-text-muted)] hover:text-white hover:bg-[#1E1E28] text-xs font-semibold transition-all"
+            className="flex flex-col items-center justify-center gap-0.5 py-2 px-0.5 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[var(--color-text-muted)] hover:text-white hover:bg-[#1E1E28] text-[10px] font-semibold transition-all"
             title="Acak posisi huruf"
           >
             <ArrowsClockwise size={15} weight="bold" />
@@ -83,7 +85,7 @@ export default function Rack({
           <button
             onClick={onSwapClick}
             disabled={!isMyTurn || hasPlacements}
-            className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[var(--color-text-muted)] hover:text-white hover:bg-[#1E1E28] disabled:opacity-30 disabled:hover:bg-[var(--color-surface)] text-xs font-semibold transition-all"
+            className="flex flex-col items-center justify-center gap-0.5 py-2 px-0.5 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[var(--color-text-muted)] hover:text-white hover:bg-[#1E1E28] disabled:opacity-30 disabled:hover:bg-[var(--color-surface)] text-[10px] font-semibold transition-all"
             title="Tukar huruf dari sisa tas (korbankan 1 turn)"
           >
             <ArrowsLeftRight size={15} weight="bold" />
@@ -94,22 +96,33 @@ export default function Rack({
           <button
             onClick={onSkip}
             disabled={!isMyTurn || hasPlacements}
-            className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[var(--color-text-muted)] hover:text-white hover:bg-[#1E1E28] disabled:opacity-30 disabled:hover:bg-[var(--color-surface)] text-xs font-semibold transition-all"
+            className="flex flex-col items-center justify-center gap-0.5 py-2 px-0.5 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[var(--color-text-muted)] hover:text-white hover:bg-[#1E1E28] disabled:opacity-30 disabled:hover:bg-[var(--color-surface)] text-[10px] font-semibold transition-all"
             title="Lewati giliran"
           >
             <FastForward size={15} weight="bold" />
             <span>Lewat</span>
           </button>
 
-          {/* Recall / Batalkan Penempatan */}
+          {/* Recall All - Tarik Semua */}
           <button
             onClick={onRecall}
             disabled={!hasPlacements}
-            className="flex items-center justify-center gap-1 py-2 px-1 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[#EF4444] hover:bg-[#EF4444]/10 disabled:opacity-30 disabled:hover:bg-[var(--color-surface)] text-xs font-semibold transition-all"
-            title="Tarik kembali huruf yang baru diletakkan"
+            className="flex flex-col items-center justify-center gap-0.5 py-2 px-0.5 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[#EF4444] hover:bg-[#EF4444]/10 disabled:opacity-30 disabled:hover:bg-[var(--color-surface)] text-[10px] font-semibold transition-all"
+            title="Tarik kembali SEMUA huruf yang sudah diletakkan"
           >
             <ArrowUUpLeft size={15} weight="bold" />
-            <span>Tarik</span>
+            <span>Semua</span>
+          </button>
+
+          {/* Recall Last - Tarik Terakhir */}
+          <button
+            onClick={onRecallLast}
+            disabled={!hasPlacements}
+            className="flex flex-col items-center justify-center gap-0.5 py-2 px-0.5 rounded-xl bg-[var(--color-surface)] border border-[#262633] text-[#F97316] hover:bg-[#F97316]/10 disabled:opacity-30 disabled:hover:bg-[var(--color-surface)] text-[10px] font-semibold transition-all"
+            title="Tarik huruf terakhir yang diletakkan"
+          >
+            <ArrowUUpLeft size={15} weight="bold" />
+            <span>1x</span>
           </button>
         </div>
 

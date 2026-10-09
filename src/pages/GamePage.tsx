@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from '@phosphor-icons/react';
+import { ArrowLeft, Stack } from '@phosphor-icons/react';
 import { useGameStore } from '../stores/gameStore';
 import { useRoomSync } from '../hooks/useRoomSync';
 import GameHeader from '../components/GameHeader';
@@ -170,7 +170,9 @@ export default function GamePage() {
   const availableRack = myRack.filter((t) => !pendingTileIds.has(t.id));
 
   const handleBoardCellClick = (row: number, col: number) => {
-    if (!currentPlayerIsMe || !selectedRackTile) return;
+    // Semua pemain boleh menyiapkan kata di papan lokal sebelum gilirannya.
+    // Hanya tombol submit yang tetap terkunci sampai giliran pemain tersebut tiba.
+    if (!selectedRackTile) return;
     const cell = wordBattle.board[row][col];
     if (cell.tile) return;
     // Jangan izinkan dua tile di cell yang sama.
@@ -265,6 +267,27 @@ export default function GamePage() {
     setBlankPlacementTarget(null);
   };
 
+  const handleRecallLast = () => {
+    setPendingPlacements((placements) => placements.slice(0, -1));
+    setSelectedRackTile(null);
+    setBlankPlacementTarget(null);
+  };
+
+  const remainingLetterCounts = wordBattle.stock.reduce<Record<string, number>>((counts, tile) => {
+    const letter = tile.isBlank ? '?' : (tile.letter || tile.displayLetter || '?');
+    counts[letter] = (counts[letter] || 0) + 1;
+    return counts;
+  }, {});
+  const remainingStockCount = wordBattle.stock.length;
+  const remainingLettersLabel = Object.entries(remainingLetterCounts)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([letter, count]) => `${letter}:${count}`)
+    .join('  ');
+
+  const handleShowRemainingTiles = () => {
+    window.alert(`Sisa huruf di kantong: ${remainingStockCount}\n\n${remainingLettersLabel || 'Kantong kosong'}`);
+  };
+
   const handleSelectBlankLetter = (chosenLetter: string) => {
     if (!blankPlacementTarget) return;
     const { row, col, tile } = blankPlacementTarget;
@@ -349,6 +372,14 @@ export default function GamePage() {
         >
           <ArrowLeft size={16} /> Kembali
         </button>
+        <button
+          onClick={handleShowRemainingTiles}
+          className="flex items-center gap-1.5 text-xs text-[var(--color-text-muted)] hover:text-white border border-[#262633] rounded-lg px-2 py-1 bg-[var(--color-surface)] hover:bg-[#1E1E28] transition-all"
+          title="Lihat distribusi sisa huruf di kantong"
+        >
+          <Stack size={14} weight="bold" />
+          <span>Sisa: {remainingStockCount}</span>
+        </button>
         <span className="text-[10px] font-mono font-bold text-[#A78BFA]">ROOM: {code}</span>
       </div>
       <GameHeader
@@ -417,6 +448,7 @@ export default function GamePage() {
         onSwapClick={handleSwap}
         onSkip={handleSkip}
         onRecall={handleRecall}
+        onRecallLast={handleRecallLast}
         onPlay={handlePlay}
         canPlay={scoreResult.isValidPlacement && pendingPlacements.length > 0}
         hasPlacements={pendingPlacements.length > 0}
