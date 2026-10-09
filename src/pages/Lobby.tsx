@@ -103,7 +103,13 @@ export default function Lobby() {
             </span>
           </div>
           <span className="text-[var(--color-text-muted)]">&bull;</span>
-          <span>Bahasa Indonesia</span>
+          <span>
+            {room?.settings.language === 'en'
+              ? 'English (TWL06)'
+              : room?.settings.language === 'mix'
+                ? 'IND + ENG (MIX)'
+                : 'Bahasa Indonesia'}
+          </span>
           <span className="text-[var(--color-text-muted)]">&bull;</span>
           <span>Maks 4 Pemain</span>
         </div>

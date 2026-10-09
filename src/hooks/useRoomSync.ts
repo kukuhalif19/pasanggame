@@ -170,11 +170,19 @@ export function useRoomSync(roomCode: string | undefined) {
     const unsub = rt.onStatus((status: ConnectionStatus) => {
       setConnectionStatus(status);
       if (status === 'connected') {
-        if (shouldResync) {
-          const me = useGameStore.getState().localPlayer;
-          if (me) {
-            rt.send('REQUEST_SYNC', { playerId: me.id }, me.id);
+        const me = useGameStore.getState().localPlayer;
+        // Setelah reconnect, kirim ulang PLAYER_JOINED (guest) atau SYNC (host).
+        // Ini mencegah player hilang dari UI lobby setelah ganti jaringan/reconnect.
+        if (me && !me.isHost) {
+          rt.send('PLAYER_JOINED', me, me.id);
+        } else if (me?.isHost) {
+          const currentRoom = useGameStore.getState().room;
+          if (currentRoom) {
+            rt.send('SYNC_ROOM_STATE', currentRoom, me.id);
           }
+        }
+        if (shouldResync && me) {
+          rt.send('REQUEST_SYNC', { playerId: me.id }, me.id);
           shouldResync = false;
         }
       } else {

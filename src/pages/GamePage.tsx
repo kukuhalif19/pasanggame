@@ -93,25 +93,46 @@ export default function GamePage() {
     if (!wordBattle && room && localPlayer && localPlayer.isHost) {
       const lang = room.settings.language ?? 'id';
       // Pastikan kamus Inggris ter-load (kalau mode en/mix) sebelum game mulai.
-      ensureDictionaryLoaded(lang).then(() => {
-        const { state, updatedPlayers } = initWordBattle(room.players, lang);
-        setWordBattle(state);
-        const updatedRoom = { ...room, players: updatedPlayers };
-        setRoom(updatedRoom);
+      // Tambahkan timeout 10 detik agar tidak hang selamanya kalau jaringan lambat/putus.
+      const loadPromise = ensureDictionaryLoaded(lang);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Dictionary load timeout (10s)')), 10000)
+      );
 
-        // Broadcast game state ke guest pemain
-        if (broadcastGameState) {
-          broadcastGameState(state, updatedRoom);
-        }
-      });
+      Promise.race([loadPromise, timeoutPromise])
+        .catch((err) => {
+          console.warn('[WordBattle] Dictionary load failed/timeout:', err);
+          // Biarkan game tetap jalan meski kamus gagal — user masih bisa main tanpa validasi.
+        })
+        .finally(() => {
+          const { state, updatedPlayers } = initWordBattle(room.players, lang);
+          setWordBattle(state);
+          const updatedRoom = { ...room, players: updatedPlayers };
+          setRoom(updatedRoom);
+
+          // Broadcast game state ke guest pemain
+          if (broadcastGameState) {
+            broadcastGameState(state, updatedRoom);
+          }
+        });
     }
-  }, [wordBattle, room, localPlayer, broadcastGameState]);
+  }, [wordBattle, room, localPlayer, broadcastGameState, setWordBattle, setRoom]);
 
   useEffect(() => {
     if (!localPlayer || !room || room.state !== 'playing') {
       navigate(`/room/${code}`);
     }
   }, [localPlayer, room, code, navigate]);
+
+  // Preload kamus sesuai bahasa room untuk SEMUA pemain (host & guest).
+  // Guest butuh kamus lokal untuk validasi kata saat menghitung skor.
+  // Dilakukan segera saat mount supaya tidak menghambat saat game berjalan.
+  useEffect(() => {
+    if (!room) return;
+    ensureDictionaryLoaded(room.settings.language ?? 'id').catch((err) => {
+      console.error('[WordBattle] Gagal memuat kamus:', err);
+    });
+  }, [room?.settings.language]);
 
   // Guest: kalau belum menerima game state dari host, minta berulang.
   // BroadcastChannel tidak menyimpan history, jadi kalau host broadcast
