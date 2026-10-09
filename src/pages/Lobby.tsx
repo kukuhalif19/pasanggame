@@ -32,8 +32,8 @@ export default function Lobby() {
   }, [room?.state, code, navigate]);
 
   const handleCopyLink = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
+    const inviteUrl = `${window.location.origin}/join?room=${code}`;
+    navigator.clipboard.writeText(inviteUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

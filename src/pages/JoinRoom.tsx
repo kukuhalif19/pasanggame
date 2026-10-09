@@ -1,13 +1,22 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { User, Key, CaretRight } from '@phosphor-icons/react';
 import { useGameStore } from '../stores/gameStore';
 
 export default function JoinRoom() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const joinRoom = useGameStore((state) => state.joinRoom);
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
+
+  // Auto-fill room code dari query param ?room=CODE
+  useEffect(() => {
+    const roomFromUrl = searchParams.get('room')?.toUpperCase() || '';
+    if (roomFromUrl && roomFromUrl.length === 6) {
+      setRoomCode(roomFromUrl);
+    }
+  }, [searchParams]);
 
   const handleJoin = () => {
     if (!name.trim() || !roomCode.trim()) return;
