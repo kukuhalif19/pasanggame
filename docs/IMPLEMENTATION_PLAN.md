@@ -2,10 +2,13 @@
 
 ## Overview
 
-- **Proyek**: PasangGame — web party game untuk pasangan LDR & teman
-- **Stack**: React + Vite + Tailwind CSS + Zustand + Supabase Realtime (nanti)
-- **Phase 1**: Local development dengan mock real-time
-- **Phase 2**: Integrasi Supabase Realtime + deploy Vercel
+| **Proyek**: PasangGame — web party game untuk pasangan LDR & teman |
+
+
+- **Stack**: React + Vite + Tailwind CSS + Zustand
+- **Realtime**: BroadcastChannel (classroom-level async), Supabase deps tersedia tapi belum integrasi (stub supabaseRealtime.ts)
+- **Phase 1**: Local development + deploy Vercel (mock realtime)
+- **Phase 2**: Integrasi Supabase Realtime → multi-device sync (tunda, manual integration saat perlu) |
 
 ## Wave 1: Project Setup & Arsitektur Dasar
 
@@ -87,6 +90,9 @@ Tampilan modern, playful, responsive, animasi halus.
 ### Tujuan
 Game multi-device real-time, deploy ke Vercel.
 
+### Status
+🚧 **BLOCKED** (Manual execution - auto-dispatch error `hermes_cli` not found)
+
 ### Tasks
 6.1 Setup Supabase project free tier  
 6.2 Integrasi Supabase Realtime Broadcast  
@@ -98,6 +104,10 @@ Game multi-device real-time, deploy ke Vercel.
 
 ## Wave 7: Rilis Berikutnya (Backlog)
 
+### Status
+🚧 **BLOCKED** (Manual execution - auto-dispatch error `hermes_cli` not found)
+
+### Backlog Items
 - Game 2: This or That
 - Game 3: Truth or Dare
 - Chat text dalam room
