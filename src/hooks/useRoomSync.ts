@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useGameStore } from '../stores/gameStore';
-import { getRealtime } from '../services/mockRealtime';
+import { getRealtime } from '../services/supabaseRealtime';
 import { dedupePlayers } from '../utils';
 import type { Player, Room, RealtimeEvent } from '../types';
 
