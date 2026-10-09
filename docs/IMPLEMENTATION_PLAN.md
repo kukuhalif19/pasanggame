@@ -2,13 +2,27 @@
 
 ## Overview
 
-| **Proyek**: PasangGame — web party game untuk pasangan LDR & teman |
-
-
+- **Proyek**: PasangGame — web party game untuk pasangan LDR & teman
+- **Repo**: `github.com/kukuhalif19/pasanggame`
+- **Live**: **`https://pasanggame.vercel.app`** (HTTP 200, deploy aktif via Vercel)
 - **Stack**: React + Vite + Tailwind CSS + Zustand
-- **Realtime**: BroadcastChannel (classroom-level async), Supabase deps tersedia tapi belum integrasi (stub supabaseRealtime.ts)
-- **Phase 1**: Local development + deploy Vercel (mock realtime)
-- **Phase 2**: Integrasi Supabase Realtime → multi-device sync (tunda, manual integration saat perlu) |
+- **Realtime**: BroadcastChannel (listener event lokal / multi-tab di browser yang sama). Supabase deps terinstall tapi belum diintegrasikan (`services/supabaseRealtime.ts` masih stub)
+- **Kamus**: KBBI v6.1.0 — 123.463 kata (jauh melampaui target awal 1.000 kata)
+
+### Status Ringkas
+
+| Fase | Isi | Status |
+|---|---|---|
+| Wave 1 | Setup & arsitektur dasar | ✅ done |
+| Wave 2 | Room system (create/join/lobby) | ✅ done |
+| Wave 3 | Word Battle core (papan, rack, skor, timer) | ✅ done |
+| Wave 4 | Kamus & validasi | ✅ done (KBBI v6.1.0) |
+| Wave 5 | Polish UI/UX & animasi | ✅ done |
+| Wave 6 | Deploy Vercel | ✅ **LIVE** |
+| Wave 6 | Integrasi Supabase Realtime (multi-device) | 🚧 pending |
+| Wave 7 | Game 2 & 3, chat, leaderboard (backlog) | 🚧 pending |
+
+> **Catatan penting**: Produk **sudah live** di Vercel. Yang belum: sinkronisasi antar-device via Supabase Realtime (saat ini BroadcastChannel hanya bekerja antar-tab di browser yang sama).
 
 ## Wave 1: Project Setup & Arsitektur Dasar
 
@@ -85,27 +99,30 @@ Tampilan modern, playful, responsive, animasi halus.
 5.7 prefers-reduced-motion  
 5.8 Verifikasi UI di 375px, 768px, 1024px, 1440px
 
-## Wave 6: Integrasi Supabase Realtime & Deploy
+## Wave 6: Deploy & Realtime Multi-Device
 
-### Tujuan
-Game multi-device real-time, deploy ke Vercel.
+### 6A — Deploy Vercel → ✅ LIVE
+Produk sudah live di `https://pasanggame.vercel.app`. Vercel auto-deploy dari branch `master`
+(`github.com/kukuhalif19/pasanggame`).
 
-### Status
-🚧 **BLOCKED** (Manual execution - auto-dispatch error `hermes_cli` not found)
+- ✅ 6.4 Setup Vercel project & deploy
+- ✅ 6.5 Subdomain Vercel (`pasanggame.vercel.app`)
+- ⚠️ 6.6 Testing multi-device — terbatas multi-tab (belum real multi-device)
+- ⬜ 6.7 Lighthouse audit & Core Web Vitals (belum dijalankan)
 
-### Tasks
-6.1 Setup Supabase project free tier  
-6.2 Integrasi Supabase Realtime Broadcast  
-6.3 Ganti mock real-time dengan Supabase channel  
-6.4 Setup Vercel project & deploy  
-6.5 Custom domain atau subdomain Vercel  
-6.6 Testing multi-device  
-6.7 Lighthouse audit & Core Web Vitals  
+### 6B — Integrasi Supabase Realtime → 🚧 PENDING
+Supabase deps terinstall (`@supabase/supabase-js@^2.117.3`), `services/supabaseRealtime.ts` masih stub.
+Saat ini sinkronisasi pakai `BroadcastChannel` — **hanya bekerja antar-tab di browser yang sama**,
+belum antar-device (HP + laptop beda jaringan).
+
+- ⬜ 6.1 Setup Supabase project free tier
+- ⬜ 6.2 Integrasi Supabase Realtime Broadcast
+- ⬜ 6.3 Ganti mock real-time (BroadcastChannel) dengan Supabase channel
 
 ## Wave 7: Rilis Berikutnya (Backlog)
 
 ### Status
-🚧 **BLOCKED** (Manual execution - auto-dispatch error `hermes_cli` not found)
+🚧 **PENDING** — belum dimulai, menunggu Wave 6B (Supabase Realtime) selesai.
 
 ### Backlog Items
 - Game 2: This or That
@@ -128,4 +145,6 @@ Game multi-device real-time, deploy ke Vercel.
 - Target utama: 2-4 pemain, pasangan LDR
 - Free tier murni untuk MVP
 - Host browser sebagai wasit, validasi kata via server
-- Local dulu, live nanti
+- **Produk sudah live di Vercel** (`pasanggame.vercel.app`)
+- **Blocker saat ini**: sinkronisasi real-time masih pakai `BroadcastChannel` (hanya antar-tab, belum antar-device). Perlu integrasi Supabase Realtime agar HP + laptop bisa main bareng dari jaringan berbeda.
+- Kamus aktual: KBBI v6.1.0 (123.463 kata) — target awal PRD 1.000 kata sudah jauh terlampaui, dan validasi berjalan client-side (Edge Function belum dibuat)
