@@ -684,6 +684,12 @@ export const INDONESIAN_DICTIONARY: Set<string> = new Set([
   'kocak', 'kudet', 'lebay', 'norak', 'nyebelin', 'nyokap', 'otw',
   'pecundang', 'sokap', 'sotoy', 'sultan', 'tepar', 'tongkrongan',
   'woles', 'yoi', 'brengsek', 'kampret', 'keparat', 'kontol', 'memek', 'ngentot', 'perek',
+  // Tambahan kata umum yang terlewat dari dataset awal
+  'awak', 'awas', 'asap', 'awan', 'awal', 'awam', 'awar', 'awet',
+  'bawah', 'berak', 'bisik', 'bubur',
+  'kelapa', 'kepala', 'lemak', 'manis', 'nyala',
+  'pekat', 'peluk', 'pisau', 'serak', 'sepak', 'setan',
+  'taman', 'tiram', 'turun', 'untuk',
 ]);
 
 export function isValidWord(word: string): boolean {
