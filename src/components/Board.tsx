@@ -67,7 +67,7 @@ export default function Board({
                       ? 'bg-gradient-to-br from-[#7C3AED] to-[#9333EA] text-white border-white shadow-md shadow-[#7C3AED]/40 scale-95 animate-pop'
                       : isHighlighted
                       ? 'bg-gradient-to-br from-[#F97316] to-[#FB923C] text-white border-[#FDBA74] shadow-lg shadow-[#F97316]/50 animate-pulse'
-                      : 'bg-[#FDF6E3] text-[#1F2937] border-[#E5D5B7] shadow-md'
+                      : 'bg-[#FDF6E3] text-[#111827] border-2 border-[#A89B8C] shadow-lg'
                     : getCellBonusColor(cell.bonus)
                 } ${
                   selectedRackTile && !activeTile
@@ -77,10 +77,10 @@ export default function Board({
               >
                 {activeTile ? (
                   <>
-                    <span className="leading-none text-xs sm:text-sm font-extrabold">
+                    <span className="leading-none text-sm sm:text-base font-extrabold drop-shadow-sm">
                       {activeTile.displayLetter || activeTile.letter || (activeTile.isBlank ? '?' : '')}
                     </span>
-                    <span className="text-[7px] leading-none opacity-70 absolute bottom-0.5 right-0.5 font-semibold">
+                    <span className="text-[7px] leading-none opacity-80 absolute bottom-0.5 right-0.5 font-semibold">
                       {activeTile.value}
                     </span>
                   </>
