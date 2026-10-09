@@ -51,18 +51,18 @@ export default function GamePage() {
   const [showSwapModal, setShowSwapModal] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
 
-  // Bersihkan tile yang sedang disiapkan saat giliran berpindah ke pemain lain.
-  // Ini mencegah tile "menggantung" yang bisa membingungkan pemain.
+  // Saat papan berubah (mis. pemain lain menaruh kata), tarik kembali HANYA
+  // tile persiapan yang cell-nya sudah terisi pemain lain — supaya tidak
+  // tertimpa / hilang. Tile yang cell-nya masih kosong tetap aman tersimpan.
   // Effect ini diletakkan SEBELUM early return untuk mematuhi aturan React hooks.
   useEffect(() => {
-    if (!wordBattle || !localPlayer) return;
-    const isMyTurn = wordBattle.currentPlayerId === localPlayer.id;
-    if (!isMyTurn && pendingPlacements.length > 0) {
-      setPendingPlacements([]);
-      setSelectedRackTile(null);
-      setBlankPlacementTarget(null);
-    }
-  }, [wordBattle?.currentPlayerId, localPlayer?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!wordBattle) return;
+    setPendingPlacements((prev) => {
+      if (prev.length === 0) return prev;
+      const kept = prev.filter((p) => wordBattle.board[p.row][p.col].tile === null);
+      return kept.length === prev.length ? prev : kept;
+    });
+  }, [wordBattle?.board]);
 
   useEffect(() => {
     if (!wordBattle && room && localPlayer && localPlayer.isHost) {
@@ -196,11 +196,9 @@ export default function GamePage() {
   const availableRack = myRack.filter((t) => !pendingTileIds.has(t.id));
 
   const handleBoardCellClick = (row: number, col: number) => {
-    // Hanya pemain yang sedang giliran yang boleh menaruh tile ke papan.
-    // Jika diizinkan sebelum giliran, tile yang sudah disiapkan bisa
-    // tertimpa oleh pemain lain saat giliran mereka (karena pendingPlacements
-    // bersifat lokal dan tidak di-broadcast ke pemain lain).
-    if (!currentPlayerIsMe) return;
+    // Semua pemain boleh menyiapkan kata di papan lokal sebelum gilirannya.
+    // Hanya tombol submit yang terkunci sampai giliran pemain tersebut tiba.
+    // Saat submit, dicek dulu apakah cell persiapan belum terisi orang lain.
     if (!selectedRackTile) return;
     const cell = wordBattle.board[row][col];
     if (cell.tile) return;
@@ -332,6 +330,23 @@ export default function GamePage() {
   };
   const handlePlay = () => {
     if (!scoreResult.isValidPlacement || !currentPlayerIsMe || !myPlayer || !wordBattle) return;
+
+    // Guard: pastikan semua cell persiapan masih kosong. Kalau ada yang sudah
+    // terisi pemain lain (mis. saat kita menyiapkan di luar giliran), tolak
+    // submit dan tarik kembali tile yang bentrok supaya tidak hilang/tertimpa.
+    const conflicting = pendingPlacements.filter(
+      (p) => wordBattle.board[p.row][p.col].tile !== null
+    );
+    if (conflicting.length > 0) {
+      const conflictKeys = new Set(conflicting.map((p) => `${p.row},${p.col}`));
+      setPendingPlacements((prev) =>
+        prev.filter((p) => !conflictKeys.has(`${p.row},${p.col}`))
+      );
+      window.alert(
+        'Sebagian hurufmu berada di petak yang sudah diisi pemain lain. Huruf tersebut ditarik kembali ke rak — silakan susun ulang.'
+      );
+      return;
+    }
 
     // 1. Commit tiles ke board
     const newBoard = wordBattle.board.map((row) => row.map((cell) => ({ ...cell })));
