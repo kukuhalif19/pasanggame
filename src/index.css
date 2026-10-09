@@ -132,9 +132,9 @@
   animation: fadeIn 0.15s ease-out forwards;
 }
 
-/* Grid utilities untuk papan 13x13 */
+/* Grid utilities untuk papan 17x17 */
 @layer utilities {
-  .grid-cols-13 {
-    grid-template-columns: repeat(13, minmax(0, 1fr));
+  .grid-cols-17 {
+    grid-template-columns: repeat(17, minmax(0, 1fr));
   }
 }

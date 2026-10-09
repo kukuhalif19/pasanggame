@@ -27,7 +27,7 @@ export default function Landing() {
         </div>
         <h3 className="text-xl font-bold text-white mb-1">Word Battle</h3>
         <p className="text-xs text-[var(--color-text-muted)] leading-relaxed mb-4">
-          Papan 13×13 Scrabble-style dengan kamus Bahasa Indonesia + slang gaul. Susun kata dan raih skor tertinggi!
+          Papan 17×17 Scrabble-style dengan kamus Bahasa Indonesia + slang gaul. Susun kata dan raih skor tertinggi!
         </p>
         <div className="flex items-center gap-2 text-xs">
           <span className="px-2.5 py-1 rounded-full bg-[#1C1C24] text-[#9CA3AF] border border-[#2D2D3B]">2-4 Pemain</span>

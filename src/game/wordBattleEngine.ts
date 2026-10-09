@@ -8,11 +8,12 @@ import type {
 import {
   BOARD_SIZE,
   BONUS_LAYOUT,
+  CENTER_INDEX,
   createInitialTileBag,
 } from './wordBattleConstants';
 import { isValidWord } from './dictionary';
 
-// 1. Inisialisasi Papan 13x13 Kosong
+// 1. Inisialisasi Papan 17x17 Kosong
 export function createEmptyBoard(): BoardCell[][] {
   const board: BoardCell[][] = [];
 
@@ -205,7 +206,7 @@ export function calculateScore(
 
   const isFirstMove = board.every((row) => row.every((cell) => cell.tile === null));
   if (isFirstMove) {
-    const touchesCenter = placements.some((p) => p.row === 6 && p.col === 6);
+    const touchesCenter = placements.some((p) => p.row === CENTER_INDEX && p.col === CENTER_INDEX);
     if (!touchesCenter) {
       return { score: 0, isValidPlacement: false, message: 'Langkah pertama wajib melewati bintang tengah (⭐)' };
     }

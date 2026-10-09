@@ -41,7 +41,7 @@ export default function Board({
 
   return (
     <div className="w-full flex justify-center items-center py-2 overflow-auto select-none">
-      <div className="grid grid-cols-13 gap-1 bg-[#F5EFE3] p-3 rounded-2xl border-2 border-[#C9B99A] shadow-2xl w-full max-w-3xl aspect-square">
+      <div className="grid grid-cols-17 gap-[2px] bg-[#F5EFE3] p-2 rounded-2xl border-2 border-[#C9B99A] shadow-2xl w-full max-w-4xl aspect-square">
         {board.map((row, rIdx) =>
           row.map((cell, cIdx) => {
             // Cek apakah ada tile pending di cell ini
