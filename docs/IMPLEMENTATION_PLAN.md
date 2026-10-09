@@ -135,6 +135,35 @@ Menangani kasus ganti jaringan (Wi-Fi → seluler) yang bikin state tertinggal.
 - ⬜ 6.7 Lighthouse audit & Core Web Vitals
 - ⚠️ Pengujian multi-device nyata (beda jaringan) masih perlu dites manual
 
+### 6E — Multi-Bahasa (IND / ENG / MIX) → ✅ done (commit `48fe7d5`)
+Pilihan bahasa ditetapkan saat **Create Room**, ikut `GameSettings.language` dan
+tersimpan di room → tidak bisa berubah mid-game. Backward-compatible: default `'id'`.
+
+**Kamus terpisah (tidak tercampur):**
+- IND → `dictionary.ts` (KBBI v6.1.0, 123.463 kata, import statis ~1.5MB)
+- ENG → `dictionary-en.ts` (TWL06 Scrabble, 178.691 kata, ~2.2MB) — **lazy chunk**,
+  hanya di-download saat mode EN/MIX (gzip 475KB). Mode IND tidak pernah fetch ini.
+- MIX → kedua kamus aktif; validasi `isValidWordForLanguage(w, 'mix')` = OR
+- Loader terpusat di `wordDictionary.ts`: `ensureDictionaryLoaded(lang)` dipanggil
+  host sebelum `initWordBattle` → kamus dijamin siap sebelum tile dibagikan.
+
+**Distribusi tile per mode (semua 98 huruf + 2 blank = 100):**
+- `INDONESIAN_TILE_DISTRIBUTION` — profil huruf Indonesia (A×12, I×7, ...)
+- `ENGLISH_TILE_DISTRIBUTION` — TWL06 standar (E×12, A×9, I×9, ...)
+- `HYBRID_TILE_DISTRIBUTION` — rata-rata frekuensi kedua bahasa (A×12, E×8, ...)
+- `createInitialTileBag(language)` memilih distribusi sesuai mode; tile tersimpan di
+  `wordBattle.stock` → aman, tidak tertukar saat permainan berjalan.
+
+**UI:**
+- Create Room: 3 button `IND` / `ENG` / `MIX` (styling sama dengan selector timer,
+  grid 3 kolom, highlight ungu saat aktif) di atas pilihan timer.
+
+**Flow engine:**
+- `initWordBattle(players, language)` → tile bag sesuai bahasa
+- `calculateScore(placements, board, language)` → validasi kata sesuai bahasa
+- Skor huruf MIX: memakai `tile.value` dari distribusi hybrid yang dipilih di awal
+  (konsisten untuk semua kata, tidak bergantung kamus tempat kata valid).
+
 ## Wave 7: Rilis Berikutnya (Backlog)
 
 ### Status
@@ -165,7 +194,9 @@ Menangani kasus ganti jaringan (Wi-Fi → seluler) yang bikin state tertinggal.
 - **Realtime**: Supabase Broadcast — sudah bisa main dari jaringan berbeda
 - **Papan 17×17**, bonus simetris 180°, center di `(8,8)`
 - **Urutan giliran acak** saat mulai (`turnOrder`), sinkron di semua pemain
-- Kamus aktual: KBBI v6.1.0 (123.463 kata) — validasi berjalan client-side (Edge Function belum dibuat)
+- Kamus: KBBI v6.1.0 (123.463 kata, ID) + TWL06 (178.691 kata, EN, lazy chunk) — validasi client-side
+- **Multi-bahasa**: mode IND / ENG / MIX dipilih saat Create Room (`GameSettings.language`),
+  kamus terpisah per bahasa + distribusi tile per mode (ID / TWL06 / hybrid, semua 100 tile)
 - `services/mockRealtime.ts` (BroadcastChannel) tidak dipakai lagi — hanya arsip
 
 > **Catatan arsitektur**: Supabase dipakai mode **Broadcast murni** (tanpa tabel/DB).
