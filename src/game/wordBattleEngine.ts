@@ -11,7 +11,11 @@ import {
   CENTER_INDEX,
   createInitialTileBag,
 } from './wordBattleConstants';
-import { isValidWord } from './dictionary';
+import { isValidWordForLanguage } from './wordDictionary';
+import type { GameLanguage } from '../types';
+
+// Re-export supaya caller bisa load kamus sebelum game mulai
+export { ensureDictionaryLoaded } from './wordDictionary';
 
 // 1. Inisialisasi Papan 17x17 Kosong
 export function createEmptyBoard(): BoardCell[][] {
@@ -37,11 +41,14 @@ export function createEmptyBoard(): BoardCell[][] {
 }
 
 // 2. Inisialisasi State Awal Word Battle
-export function initWordBattle(players: Player[]): {
+export function initWordBattle(
+  players: Player[],
+  language: GameLanguage = 'id'
+): {
   state: WordBattleState;
   updatedPlayers: Player[];
 } {
-  const stock = createInitialTileBag();
+  const stock = createInitialTileBag(language);
   const board = createEmptyBoard();
 
   // Bagikan 7 tile ke setiap pemain
@@ -182,7 +189,8 @@ function readWordFromLine(
 
 export function calculateScore(
   placements: PendingPlacement[],
-  board: BoardCell[][]
+  board: BoardCell[][],
+  language: GameLanguage = 'id'
 ): { score: number; isValidPlacement: boolean; message?: string; words?: PlacedWordInfo[] } {
   if (placements.length === 0) {
     return { score: 0, isValidPlacement: false, message: 'Belum ada huruf yang diletakkan' };
@@ -254,7 +262,7 @@ export function calculateScore(
   // Validate every formed word
   for (const w of wordsToScore) {
     const lower = w.word.toLowerCase();
-    if (lower.length >= 2 && !isValidWord(lower)) {
+    if (lower.length >= 2 && !isValidWordForLanguage(lower, language)) {
       return {
         score: 0,
         isValidPlacement: false,

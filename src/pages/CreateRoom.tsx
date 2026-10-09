@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, CaretRight, Check } from '@phosphor-icons/react';
 import { useGameStore } from '../stores/gameStore';
+import type { GameLanguage } from '../types';
 
 export default function CreateRoom() {
   const navigate = useNavigate();
@@ -9,10 +10,11 @@ export default function CreateRoom() {
 
   const [name, setName] = useState('');
   const [timerSeconds, setTimerSeconds] = useState<0 | 30 | 60 | 90>(60);
+  const [language, setLanguage] = useState<GameLanguage>('id');
 
   const handleCreate = () => {
     if (!name.trim()) return;
-    createRoom(name.trim(), { turnTimerSeconds: timerSeconds });
+    createRoom(name.trim(), { turnTimerSeconds: timerSeconds, language });
     // Room code is auto-generated in store
     const roomCode = useGameStore.getState().room?.code;
     if (roomCode) {
@@ -44,6 +46,41 @@ export default function CreateRoom() {
               className="w-full pl-10 pr-4 py-3 bg-[var(--color-surface-elevated)] border border-[#2D2D3B] rounded-xl text-white placeholder:text-[#4A4A5B] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
             />
           </div>
+        </div>
+
+        {/* Language Setting */}
+        <div className="mb-6">
+          <label className="block text-sm font-semibold mb-3 text-[var(--color-text-primary)]">
+            Bahasa Kamus
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { val: 'id' as const, label: 'IND', desc: 'Indonesia' },
+              { val: 'en' as const, label: 'ENG', desc: 'English' },
+              { val: 'mix' as const, label: 'MIX', desc: 'IND + ENG' },
+            ].map((item) => (
+              <button
+                key={item.val}
+                onClick={() => setLanguage(item.val)}
+                className={`py-3 rounded-lg font-semibold text-xs transition-all relative flex flex-col items-center justify-center ${
+                  language === item.val
+                    ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[#7C3AED]/30'
+                    : 'bg-[var(--color-surface-elevated)] text-[var(--color-text-muted)] hover:bg-[#262633] border border-[#2D2D3B]'
+                }`}
+              >
+                {language === item.val && (
+                  <Check size={14} weight="bold" className="absolute top-1 right-1" />
+                )}
+                <span className="font-bold">{item.label}</span>
+                <span className="text-[10px] opacity-75">{item.desc}</span>
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)] mt-2">
+            {language === 'id' && 'Validasi kata menggunakan kamus Bahasa Indonesia (KBBI).'}
+            {language === 'en' && 'Validasi kata menggunakan kamus Scrabble Inggris (TWL06).'}
+            {language === 'mix' && 'Validasi kata menggunakan KBBI + TWL06 (semua kata valid).'}
+          </p>
         </div>
 
         {/* Timer Setting */}

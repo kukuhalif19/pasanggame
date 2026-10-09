@@ -11,10 +11,11 @@ import {
   initWordBattle,
   calculateScore,
   swapTiles,
+  ensureDictionaryLoaded,
   type PendingPlacement,
 } from '../game/wordBattleEngine';
 import { calculateFinalScores, hasPassEnded } from '../game/gameEnd';
-import type { Tile, PlacedWord } from '../types';
+import type { Tile, PlacedWord, GameLanguage } from '../types';
 
 /**
  * Hitung ID pemain berikutnya.
@@ -72,6 +73,9 @@ export default function GamePage() {
   const [showSwapModal, setShowSwapModal] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
 
+  // Language room ditentukan saat create room — dipakai untuk validasi kamus.
+  const language: GameLanguage = room?.settings.language ?? 'id';
+
   // Saat papan berubah (mis. pemain lain menaruh kata), tarik kembali HANYA
   // tile persiapan yang cell-nya sudah terisi pemain lain — supaya tidak
   // tertimpa / hilang. Tile yang cell-nya masih kosong tetap aman tersimpan.
@@ -87,15 +91,19 @@ export default function GamePage() {
 
   useEffect(() => {
     if (!wordBattle && room && localPlayer && localPlayer.isHost) {
-      const { state, updatedPlayers } = initWordBattle(room.players);
-      setWordBattle(state);
-      const updatedRoom = { ...room, players: updatedPlayers };
-      setRoom(updatedRoom);
+      const lang = room.settings.language ?? 'id';
+      // Pastikan kamus Inggris ter-load (kalau mode en/mix) sebelum game mulai.
+      ensureDictionaryLoaded(lang).then(() => {
+        const { state, updatedPlayers } = initWordBattle(room.players, lang);
+        setWordBattle(state);
+        const updatedRoom = { ...room, players: updatedPlayers };
+        setRoom(updatedRoom);
 
-      // Broadcast game state ke guest pemain
-      if (broadcastGameState) {
-        broadcastGameState(state, updatedRoom);
-      }
+        // Broadcast game state ke guest pemain
+        if (broadcastGameState) {
+          broadcastGameState(state, updatedRoom);
+        }
+      });
     }
   }, [wordBattle, room, localPlayer, broadcastGameState]);
 
@@ -209,7 +217,7 @@ export default function GamePage() {
   const myPlayer = room.players.find((p) => p.id === localPlayer.id);
   const currentPlayerObj = room.players.find((p) => p.id === wordBattle.currentPlayerId);
   const myRack = myPlayer?.rack || [];
-  const scoreResult = calculateScore(pendingPlacements, wordBattle.board);
+  const scoreResult = calculateScore(pendingPlacements, wordBattle.board, language);
 
   // Tile yang sudah ditaruh (pending) HARUS hilang dari rack, seperti memindahkan
   // ubin dari rak ke papan. Tanpa ini satu tile bisa dipakai berulang kali.

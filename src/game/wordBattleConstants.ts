@@ -1,4 +1,4 @@
-import type { BonusType, Tile } from '../types';
+import type { BonusType, Tile, GameLanguage } from '../types';
 
 export const BOARD_SIZE = 17;
 
@@ -80,22 +80,22 @@ export const BONUS_LAYOUT: { [key: string]: BonusType } = {
   '8,9': '2L',
 };
 
-// 100 Tiles Indonesian Distribution
+// 100 Tiles Indonesian Distribution (98 letters + 2 blanks)
 export const INDONESIAN_TILE_DISTRIBUTION: { letter: string; value: number; count: number }[] = [
   // 1 Point
-  { letter: 'A', value: 1, count: 17 },
-  { letter: 'I', value: 1, count: 9 },
+  { letter: 'A', value: 1, count: 12 },
+  { letter: 'I', value: 1, count: 7 },
   { letter: 'U', value: 1, count: 7 },
-  { letter: 'E', value: 1, count: 8 },
+  { letter: 'E', value: 1, count: 6 },
   { letter: 'O', value: 1, count: 7 },
   { letter: 'N', value: 1, count: 6 },
-  { letter: 'S', value: 1, count: 5 },
-  { letter: 'T', value: 1, count: 5 },
+  { letter: 'S', value: 1, count: 4 },
+  { letter: 'T', value: 1, count: 4 },
 
   // 2 Points
   { letter: 'R', value: 2, count: 5 },
   { letter: 'K', value: 2, count: 4 },
-  { letter: 'L', value: 2, count: 4 },
+  { letter: 'L', value: 2, count: 3 },
   { letter: 'D', value: 2, count: 4 },
   { letter: 'M', value: 2, count: 3 },
 
@@ -124,11 +124,114 @@ export const INDONESIAN_TILE_DISTRIBUTION: { letter: string; value: number; coun
   { letter: ' ', value: 0, count: 2 },
 ];
 
-export function createInitialTileBag(): Tile[] {
+// 100 Tiles English Distribution (TWL06 / Standard Scrabble)
+export const ENGLISH_TILE_DISTRIBUTION: { letter: string; value: number; count: number }[] = [
+  // 1 Point
+  { letter: 'E', value: 1, count: 12 },
+  { letter: 'A', value: 1, count: 9 },
+  { letter: 'I', value: 1, count: 9 },
+  { letter: 'O', value: 1, count: 8 },
+  { letter: 'N', value: 1, count: 6 },
+  { letter: 'R', value: 1, count: 6 },
+  { letter: 'T', value: 1, count: 6 },
+  { letter: 'L', value: 1, count: 4 },
+  { letter: 'S', value: 1, count: 4 },
+  { letter: 'U', value: 1, count: 4 },
+
+  // 2 Points
+  { letter: 'D', value: 2, count: 4 },
+  { letter: 'G', value: 2, count: 3 },
+
+  // 3 Points
+  { letter: 'B', value: 3, count: 2 },
+  { letter: 'C', value: 3, count: 2 },
+  { letter: 'M', value: 3, count: 2 },
+  { letter: 'P', value: 3, count: 2 },
+
+  // 4 Points
+  { letter: 'F', value: 4, count: 2 },
+  { letter: 'H', value: 4, count: 2 },
+  { letter: 'V', value: 4, count: 2 },
+  { letter: 'W', value: 4, count: 2 },
+  { letter: 'Y', value: 4, count: 2 },
+
+  // 5 Points
+  { letter: 'K', value: 5, count: 1 },
+
+  // 8 Points
+  { letter: 'J', value: 8, count: 1 },
+  { letter: 'X', value: 8, count: 1 },
+
+  // 10 Points
+  { letter: 'Q', value: 10, count: 1 },
+  { letter: 'Z', value: 10, count: 1 },
+
+  // Blank / Wildcard
+  { letter: ' ', value: 0, count: 2 },
+];
+
+// 100 Tiles Hybrid Distribution (Mix mode: balanced for both languages)
+export const HYBRID_TILE_DISTRIBUTION: { letter: string; value: number; count: number }[] = [
+  // 1 Point — frekuensi tinggi di kedua bahasa
+  { letter: 'E', value: 1, count: 8 },
+  { letter: 'A', value: 1, count: 12 },
+  { letter: 'I', value: 1, count: 8 },
+  { letter: 'O', value: 1, count: 7 },
+  { letter: 'U', value: 1, count: 6 },
+  { letter: 'N', value: 1, count: 6 },
+  { letter: 'R', value: 1, count: 5 },
+  { letter: 'T', value: 1, count: 5 },
+  { letter: 'S', value: 1, count: 5 },
+  { letter: 'L', value: 1, count: 4 },
+
+  // 2 Points
+  { letter: 'D', value: 2, count: 4 },
+  { letter: 'G', value: 2, count: 3 },
+  { letter: 'K', value: 2, count: 3 },
+  { letter: 'M', value: 2, count: 2 },
+
+  // 3 Points
+  { letter: 'B', value: 3, count: 2 },
+  { letter: 'C', value: 3, count: 2 },
+  { letter: 'H', value: 3, count: 2 },
+  { letter: 'P', value: 3, count: 2 },
+
+  // 4 Points
+  { letter: 'F', value: 4, count: 2 },
+  { letter: 'W', value: 4, count: 2 },
+  { letter: 'Y', value: 4, count: 2 },
+  { letter: 'V', value: 4, count: 2 },
+
+  // 5 Points
+  { letter: 'J', value: 5, count: 1 },
+
+  // 8 Points
+  { letter: 'X', value: 8, count: 1 },
+  { letter: 'Z', value: 8, count: 1 },
+  { letter: 'Q', value: 8, count: 1 },
+
+  // Blank / Wildcard
+  { letter: ' ', value: 0, count: 2 },
+];
+
+/**
+ * Buat karung tile sesuai bahasa yang dipilih saat room dibuat.
+ * - 'id'  → distribusi Indonesia
+ * - 'en'  → distribusi Inggris (TWL06)
+ * - 'mix' → distribusi hybrid (seimbang untuk kedua bahasa)
+ */
+export function createInitialTileBag(language: GameLanguage = 'id'): Tile[] {
+  const distribution =
+    language === 'en'
+      ? ENGLISH_TILE_DISTRIBUTION
+      : language === 'mix'
+        ? HYBRID_TILE_DISTRIBUTION
+        : INDONESIAN_TILE_DISTRIBUTION;
+
   const bag: Tile[] = [];
   let id = 1;
 
-  for (const item of INDONESIAN_TILE_DISTRIBUTION) {
+  for (const item of distribution) {
     for (let i = 0; i < item.count; i++) {
       bag.push({
         id: `tile-${id++}`,
