@@ -690,6 +690,17 @@ export const INDONESIAN_DICTIONARY: Set<string> = new Set([
   'kelapa', 'kepala', 'lemak', 'manis', 'nyala',
   'pekat', 'peluk', 'pisau', 'serak', 'sepak', 'setan',
   'taman', 'tiram', 'turun', 'untuk',
+  // Tambahan 64 kata umum sehari-hari
+  'anjing', 'bantal', 'berenang', 'berlari', 'bukit', 'burung',
+  'detik', 'energi', 'gosok', 'guntur', 'gunung', 'hidung',
+  'istri', 'jelek', 'jumat', 'kamis', 'kampung', 'kasur',
+  'kelabang', 'kilat', 'kucing', 'lebah', 'leher', 'lemari',
+  'lembah', 'lipan', 'listrik', 'lutut', 'memasak', 'mendung',
+  'menit', 'minyak', 'mulut', 'muntah', 'nyamuk', 'nyeri',
+  'orange', 'pantai', 'pasir', 'pelangi', 'perak', 'perut',
+  'pink', 'provinsi', 'pulau', 'pulpen', 'punggung', 'ranting',
+  'ratus', 'rumput', 'salju', 'saudara', 'selasa', 'senin',
+  'suami', 'sungai', 'tangan', 'tangga', 'telinga', 'terbang',
 ]);
 
 export function isValidWord(word: string): boolean {
