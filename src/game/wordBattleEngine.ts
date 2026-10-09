@@ -66,6 +66,7 @@ export function initWordBattle(players: Player[]): {
     stock,
     consecutivePassRounds: 0,
     placedWords: [],
+    lastPlacedWord: null,
     winnerId: null,
     winnerNames: null,
   };

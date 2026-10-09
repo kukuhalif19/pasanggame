@@ -4,6 +4,8 @@ import type { PendingPlacement } from '../game/wordBattleEngine';
 interface BoardProps {
   board: BoardCell[][];
   pendingPlacements: PendingPlacement[];
+  /** Koordinat kata terakhir yang sudah tervalidasi dan dikirim ke semua pemain. */
+  highlightedCells: { row: number; col: number }[];
   onCellClick: (row: number, col: number) => void;
   selectedRackTile: Tile | null;
 }
@@ -11,6 +13,7 @@ interface BoardProps {
 export default function Board({
   board,
   pendingPlacements,
+  highlightedCells,
   onCellClick,
   selectedRackTile,
 }: BoardProps) {
@@ -45,6 +48,9 @@ export default function Board({
             const pending = pendingPlacements.find(
               (p) => p.row === rIdx && p.col === cIdx
             );
+            const isHighlighted = highlightedCells.some(
+              (h) => h.row === rIdx && h.col === cIdx
+            );
             const activeTile = cell.tile || pending?.tile;
             const isPending = !!pending;
 
@@ -59,6 +65,8 @@ export default function Board({
                   activeTile
                     ? isPending
                       ? 'bg-gradient-to-br from-[#7C3AED] to-[#9333EA] text-white border-white shadow-md shadow-[#7C3AED]/40 scale-95 animate-pop'
+                      : isHighlighted
+                      ? 'bg-gradient-to-br from-[#F97316] to-[#FB923C] text-white border-[#FDBA74] shadow-lg shadow-[#F97316]/50 animate-pulse'
                       : 'bg-[#FDF6E3] text-[#1F2937] border-[#E5D5B7] shadow-md'
                     : getCellBonusColor(cell.bonus)
                 } ${

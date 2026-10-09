@@ -56,6 +56,8 @@ export interface WordBattleState {
   stock: Tile[];
   consecutivePassRounds: number;
   placedWords: PlacedWord[];
+  /** Kata utama dari langkah terakhir yang sah; disinkronkan agar semua pemain melihat sorotan sama. */
+  lastPlacedWord: PlacedWord | null;
   winnerId: string | null;
   winnerNames: string[] | null;
 }

@@ -13,7 +13,7 @@ import {
   swapTiles,
   type PendingPlacement,
 } from '../game/wordBattleEngine';
-import type { Tile } from '../types';
+import type { Tile, PlacedWord } from '../types';
 
 /**
  * Hitung ID pemain berikutnya secara aman.
@@ -337,6 +337,19 @@ export default function GamePage() {
 
     // 5. Update state
     setRoom({ ...room, players: updatedPlayers });
+    
+    // Build lastPlacedWord dari kata utama (scoreResult.words[0])
+    const mainWord = (scoreResult.words || [])[0];
+    const lastPlacedWordData: PlacedWord | null = mainWord
+      ? {
+          word: mainWord.word,
+          playerId: myPlayer.id,
+          score: scoreResult.score,
+          cells: mainWord.tiles.map(t => ({ row: t.row, col: t.col })),
+          timestamp: Date.now(),
+        }
+      : null;
+    
     setWordBattle({
       ...wordBattle,
       board: newBoard,
@@ -344,9 +357,10 @@ export default function GamePage() {
       currentPlayerId: nextPlayerId,
       turnStartTime: Date.now(),
       consecutivePassRounds: 0,
+      lastPlacedWord: lastPlacedWordData,
     });
 
-    // 6. Broadcast game state ke semua pemain
+    // 6. Broadcast game state ke semua pemain (dengan lastPlacedWord)
     const updatedWordBattle = {
       ...wordBattle,
       board: newBoard,
@@ -354,6 +368,7 @@ export default function GamePage() {
       currentPlayerId: nextPlayerId,
       turnStartTime: Date.now(),
       consecutivePassRounds: 0,
+      lastPlacedWord: lastPlacedWordData,
     };
     if (broadcastGameState) {
       broadcastGameState(updatedWordBattle, { ...room, players: updatedPlayers });
@@ -405,10 +420,20 @@ export default function GamePage() {
           <span>Giliran: <span className="text-white">{currentPlayerObj?.name || 'Loading...'}</span></span>
         )}
       </div>
+      {/* Label kata terakhir yang berhasil dipasang */}
+      {wordBattle.lastPlacedWord && (
+        <div className="w-full max-w-[440px] px-2 mb-2 flex items-center justify-center gap-2 text-xs">
+          <span className="px-2 py-0.5 rounded-lg bg-[#F97316]/15 border border-[#F97316]/40 text-[#FDBA74] font-bold">
+            Kata terakhir: {wordBattle.lastPlacedWord.word} · +{wordBattle.lastPlacedWord.score}
+          </span>
+        </div>
+      )}
+
       <div className="flex-1 flex items-center justify-center my-4">
         <Board
           board={wordBattle.board}
           pendingPlacements={pendingPlacements}
+          highlightedCells={wordBattle.lastPlacedWord?.cells || []}
           onCellClick={handleBoardCellClick}
           selectedRackTile={selectedRackTile}
         />
