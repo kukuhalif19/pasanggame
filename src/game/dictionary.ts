@@ -677,6 +677,13 @@ export const INDONESIAN_DICTIONARY: Set<string> = new Set([
   'suara', 'suram', 'surat', 'syukuran', 'tabungan', 'tanaman', 'target', 'tarian', 'tarif', 'teater', 'tebal', 'tekun',
   'telpon', 'tempe', 'tenang', 'terang', 'terminal', 'ternak', 'tiket', 'tipis', 'titik', 'tomat', 'tombol', 'tontonan',
   'trofi', 'trotoar', 'tugas', 'tulisan', 'tumpul', 'turnamen', 'undangan', 'upacara', 'wisuda', 'wortel',
+  // --- Kosakata tidak baku, slang, dan percakapan sehari-hari ---
+  'alay', 'ambruk', 'ampas', 'bacot', 'baper', 'beb', 'bejat', 'bego', 'berisik', 'bokek', 'bonyok',
+  'bro', 'cabut', 'caper', 'cewek', 'cemen', 'cengin', 'cocot', 'cuan', 'culun', 'demen', 'depres',
+  'dongo', 'gebetan', 'gaje', 'galau', 'garing', 'gas', 'geblek', 'geer', 'gokil', 'gombal', 'jomblo',
+  'kepo', 'kece', 'kocak', 'kudet', 'lebay', 'mager', 'mantul', 'norak', 'nyebelin', 'nyokap', 'otw',
+  'pecundang', 'santuy', 'sokap', 'sotoy', 'spam', 'sultan', 'tepar', 'tolol', 'tongkrongan', 'udik',
+  'woles', 'yoi', 'zonk', 'asu', 'brengsek', 'kampret', 'keparat', 'kontol', 'memek', 'ngentot', 'perek',
 ]);
 
 export function isValidWord(word: string): boolean {
