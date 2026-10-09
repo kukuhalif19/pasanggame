@@ -6,7 +6,8 @@
 - **Repo**: `github.com/kukuhalif19/pasanggame`
 - **Live**: **`https://pasanggame.vercel.app`** (HTTP 200, deploy aktif via Vercel)
 - **Stack**: React + Vite + Tailwind CSS + Zustand
-- **Realtime**: BroadcastChannel (listener event lokal / multi-tab di browser yang sama). Supabase deps terinstall tapi belum diintegrasikan (`services/supabaseRealtime.ts` masih stub)
+- **Realtime**: **Supabase Realtime Broadcast** (sudah terintegrasi & live). Channel `pasanggame:{roomCode}`.
+  Kredensial via env `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`. `services/mockRealtime.ts` (BroadcastChannel) tidak dipakai lagi.
 - **Kamus**: KBBI v6.1.0 — 123.463 kata (jauh melampaui target awal 1.000 kata)
 
 ### Status Ringkas
@@ -15,14 +16,16 @@
 |---|---|---|
 | Wave 1 | Setup & arsitektur dasar | ✅ done |
 | Wave 2 | Room system (create/join/lobby) | ✅ done |
-| Wave 3 | Word Battle core (papan, rack, skor, timer) | ✅ done |
+| Wave 3 | Word Battle core (papan 17×17, rack, skor, timer) | ✅ done |
 | Wave 4 | Kamus & validasi | ✅ done (KBBI v6.1.0) |
 | Wave 5 | Polish UI/UX & animasi | ✅ done |
-| Wave 6 | Deploy Vercel | ✅ **LIVE** |
-| Wave 6 | Integrasi Supabase Realtime (multi-device) | 🚧 pending |
+| Wave 6A | Deploy Vercel | ✅ **LIVE** |
+| Wave 6B | Supabase Realtime multi-device | ✅ **LIVE** (Broadcast) |
+| Wave 6C | Auto-resync saat reconnect + indikator koneksi | ✅ done |
 | Wave 7 | Game 2 & 3, chat, leaderboard (backlog) | 🚧 pending |
 
-> **Catatan penting**: Produk **sudah live** di Vercel. Yang belum: sinkronisasi antar-device via Supabase Realtime (saat ini BroadcastChannel hanya bekerja antar-tab di browser yang sama).
+> **Papan 17×17** dengan layout bonus simetris 180° (61 petak bonus). Distribusi 100 tile & aturan lain tidak berubah.
+> **Urutan giliran diacak** saat game dimulai (`turnOrder`), bukan urutan join.
 
 ## Wave 1: Project Setup & Arsitektur Dasar
 
@@ -110,19 +113,32 @@ Produk sudah live di `https://pasanggame.vercel.app`. Vercel auto-deploy dari br
 - ⚠️ 6.6 Testing multi-device — terbatas multi-tab (belum real multi-device)
 - ⬜ 6.7 Lighthouse audit & Core Web Vitals (belum dijalankan)
 
-### 6B — Integrasi Supabase Realtime → 🚧 PENDING
-Supabase deps terinstall (`@supabase/supabase-js@^2.117.3`), `services/supabaseRealtime.ts` masih stub.
-Saat ini sinkronisasi pakai `BroadcastChannel` — **hanya bekerja antar-tab di browser yang sama**,
-belum antar-device (HP + laptop beda jaringan).
+### 6B — Supabase Realtime Multi-Device → ✅ LIVE
+Supabase deps `@supabase/supabase-js@^2.117.3`, `services/supabaseRealtime.ts` aktif.
+Channel `pasanggame:{roomCode}`, broadcast mode. Kredensial dari env
+`VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` (di-set di Vercel project settings).
 
-- ⬜ 6.1 Setup Supabase project free tier
-- ⬜ 6.2 Integrasi Supabase Realtime Broadcast
-- ⬜ 6.3 Ganti mock real-time (BroadcastChannel) dengan Supabase channel
+- ✅ 6.1 Setup Supabase project free tier (`xsezlpbzwncjjxhcscdb`)
+- ✅ 6.2 Integrasi Supabase Realtime Broadcast
+- ✅ 6.3 Ganti mock real-time dengan Supabase channel
+- ✅ Bisa main HP + laptop dari jaringan berbeda
+
+### 6C — Auto-resync saat Reconnect → ✅ done
+Menangani kasus ganti jaringan (Wi-Fi → seluler) yang bikin state tertinggal.
+
+- ✅ Track status channel: `connecting` / `connected` / `reconnecting` / `disconnected`
+- ✅ `send()` refuse saat belum `connected` (event tidak hilang diam-diam) + handle error
+- ✅ Auto `REQUEST_SYNC` ke host begitu channel tersambung lagi
+- ✅ Badge "Menyambungkan ulang…" saat koneksi tidak normal
+
+### 6D — Belum dikerjakan
+- ⬜ 6.7 Lighthouse audit & Core Web Vitals
+- ⚠️ Pengujian multi-device nyata (beda jaringan) masih perlu dites manual
 
 ## Wave 7: Rilis Berikutnya (Backlog)
 
 ### Status
-🚧 **PENDING** — belum dimulai, menunggu Wave 6B (Supabase Realtime) selesai.
+🚧 **PENDING** — belum dimulai.
 
 ### Backlog Items
 - Game 2: This or That
@@ -144,7 +160,15 @@ belum antar-device (HP + laptop beda jaringan).
 - Tidak ada akun/login untuk MVP
 - Target utama: 2-4 pemain, pasangan LDR
 - Free tier murni untuk MVP
-- Host browser sebagai wasit, validasi kata via server
+- Host browser sebagai wasit, validasi kata client-side
 - **Produk sudah live di Vercel** (`pasanggame.vercel.app`)
-- **Blocker saat ini**: sinkronisasi real-time masih pakai `BroadcastChannel` (hanya antar-tab, belum antar-device). Perlu integrasi Supabase Realtime agar HP + laptop bisa main bareng dari jaringan berbeda.
-- Kamus aktual: KBBI v6.1.0 (123.463 kata) — target awal PRD 1.000 kata sudah jauh terlampaui, dan validasi berjalan client-side (Edge Function belum dibuat)
+- **Realtime**: Supabase Broadcast — sudah bisa main dari jaringan berbeda
+- **Papan 17×17**, bonus simetris 180°, center di `(8,8)`
+- **Urutan giliran acak** saat mulai (`turnOrder`), sinkron di semua pemain
+- Kamus aktual: KBBI v6.1.0 (123.463 kata) — validasi berjalan client-side (Edge Function belum dibuat)
+- `services/mockRealtime.ts` (BroadcastChannel) tidak dipakai lagi — hanya arsip
+
+> **Catatan arsitektur**: Supabase dipakai mode **Broadcast murni** (tanpa tabel/DB).
+> Host bertindak sebagai sumber state — kalau host keluar, state game tidak tersimpan di server.
+> Event yang terlewat saat putus **tidak** bisa diambil ulang dari server (tidak ada history),
+> karena itu auto-resync `REQUEST_SYNC` saat reconnect itu penting.
