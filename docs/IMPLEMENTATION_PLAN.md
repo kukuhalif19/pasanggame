@@ -145,6 +145,7 @@ tersimpan di room → tidak bisa berubah mid-game. Backward-compatible: default 
 3. **Display Bahasa di Lobby**: Memastikan `room.settings.language` tersinkron penuh ke store saat guest bergabung, sehingga label bahasa yang tampil di lobby konsisten (IND / ENG / MIX).
 4. **Validasi Kontinuitas Tile (Anti-Gap)**: Melarang meletakkan tile yang memiliki petak kosong (gap/celah) di antaranya dalam satu langkah (contoh: B di r5, loncat kosong r6, A di r7 dan H di r8). Validasi ini mengecek apakah semua petak dari min ke max sudah terisi tile baru atau tile yang sudah ada di papan sebelumnya.
 5. **Validasi Kata ENG/MIX**: Mode ENG memakai TWL06 (178.691 kata), MIX memakai gabungan KBBI + TWL06 dengan skor huruf hybrid yang konsisten.
+6. **Arti Kata Terakhir (additive)**: Setelah kata valid berhasil dipasang, kartu kecil di bawah badge “Kata terakhir” mengambil arti secara asynchronous. IND memakai Wiktionary Indonesia; ENG memakai Free Dictionary API; MIX mencoba IND lalu ENG. Request memiliki timeout 5 detik dan cache per kata. API gagal/tidak ada arti hanya menyembunyikan kartu arti—tidak pernah mengubah board, skor, giliran, rack, state realtime, atau validasi kata.
 
 **Kamus terpisah (tidak tercampur):**
 - IND → `dictionary.ts` (KBBI v6.1.0, 123.463 kata, import statis ~1.5MB)

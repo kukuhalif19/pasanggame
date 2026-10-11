@@ -15,6 +15,7 @@ import {
   type PendingPlacement,
 } from '../game/wordBattleEngine';
 import { calculateFinalScores, hasPassEnded } from '../game/gameEnd';
+import { getWordDefinition, type WordDefinition } from '../services/wordDefinition';
 import type { Tile, PlacedWord, GameLanguage } from '../types';
 
 /**
@@ -72,6 +73,8 @@ export default function GamePage() {
   } | null>(null);
   const [showSwapModal, setShowSwapModal] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
+  const [lastWordDefinition, setLastWordDefinition] = useState<WordDefinition | null>(null);
+  const [isLoadingDefinition, setIsLoadingDefinition] = useState(false);
 
   // Language room ditentukan saat create room — dipakai untuk validasi kamus.
   const language: GameLanguage = room?.settings.language ?? 'id';
@@ -88,6 +91,37 @@ export default function GamePage() {
       return kept.length === prev.length ? prev : kept;
     });
   }, [wordBattle?.board]);
+
+  // Ambil arti kata terakhir dari kamus online (additive saja).
+  // Kegagalan / timeout hanya menyembunyikan kartu arti, tidak memengaruhi game.
+  useEffect(() => {
+    const word = wordBattle?.lastPlacedWord?.word;
+    if (!word) {
+      setLastWordDefinition(null);
+      setIsLoadingDefinition(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoadingDefinition(true);
+    getWordDefinition(word, language)
+      .then((def) => {
+        if (cancelled) return;
+        setLastWordDefinition(def);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLastWordDefinition(null);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsLoadingDefinition(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [wordBattle?.lastPlacedWord?.word, language]);
 
   useEffect(() => {
     if (!wordBattle && room && localPlayer && localPlayer.isHost) {
@@ -524,13 +558,30 @@ export default function GamePage() {
           <span>Giliran: <span className="text-white">{currentPlayerObj?.name || 'Loading...'}</span></span>
         )}
       </div>
-      {/* Label kata terakhir yang berhasil dipasang */}
+      {/* Informasi kata terakhir — murni tampilan, tidak mengubah state permainan. */}
       {wordBattle.lastPlacedWord && (
-        <div className="w-full max-w-[440px] px-2 mb-2 flex items-center justify-center gap-2 text-xs">
-          <span className="px-2 py-0.5 rounded-lg bg-[#F97316]/15 border border-[#F97316]/40 text-[#FDBA74] font-bold">
-            Kata terakhir: {wordBattle.lastPlacedWord.word} · +{wordBattle.lastPlacedWord.score}
-          </span>
-        </div>
+        <section className="w-full max-w-[440px] px-2 mb-2 text-xs" aria-live="polite">
+          <div className="flex items-center justify-center gap-2">
+            <span className="px-2 py-0.5 rounded-lg bg-[#F97316]/15 border border-[#F97316]/40 text-[#FDBA74] font-bold">
+              Kata terakhir: {wordBattle.lastPlacedWord.word} · +{wordBattle.lastPlacedWord.score}
+            </span>
+          </div>
+          {(isLoadingDefinition || lastWordDefinition) && (
+            <div className="mt-1.5 rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-center text-slate-300">
+              {isLoadingDefinition ? (
+                <span className="text-slate-500">Mencari arti kata…</span>
+              ) : lastWordDefinition ? (
+                <>
+                  {lastWordDefinition.partOfSpeech && (
+                    <span className="mr-1.5 font-medium text-[#FDBA74]">{lastWordDefinition.partOfSpeech}</span>
+                  )}
+                  <span className="italic text-slate-400">Arti:</span>{' '}
+                  <span>{lastWordDefinition.definition}</span>
+                </>
+              ) : null}
+            </div>
+          )}
+        </section>
       )}
 
       <div className="flex-1 flex items-center justify-center my-4">
