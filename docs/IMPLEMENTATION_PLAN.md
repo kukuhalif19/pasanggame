@@ -146,6 +146,7 @@ tersimpan di room → tidak bisa berubah mid-game. Backward-compatible: default 
 4. **Validasi Kontinuitas Tile (Anti-Gap)**: Melarang meletakkan tile yang memiliki petak kosong (gap/celah) di antaranya dalam satu langkah (contoh: B di r5, loncat kosong r6, A di r7 dan H di r8). Validasi ini mengecek apakah semua petak dari min ke max sudah terisi tile baru atau tile yang sudah ada di papan sebelumnya.
 5. **Validasi Kata ENG/MIX**: Mode ENG memakai TWL06 (178.691 kata), MIX memakai gabungan KBBI + TWL06 dengan skor huruf hybrid yang konsisten.
 6. **Arti Kata Terakhir (additive)**: Setelah kata valid berhasil dipasang, kartu kecil di bawah badge “Kata terakhir” mengambil arti secara asynchronous. IND memakai Wiktionary Indonesia; ENG memakai Free Dictionary API; MIX mencoba IND lalu ENG. Request memiliki timeout 5 detik dan cache per kata. API gagal/tidak ada arti hanya menyembunyikan kartu arti—tidak pernah mengubah board, skor, giliran, rack, state realtime, atau validasi kata.
+7. **Karung MIX 120 tile**: Mode MIX memakai 120 tile (118 huruf + 2 blank), sementara IND dan ENG tetap 100 tile. Penambahan difokuskan pada huruf umum agar permainan gabungan lebih panjang tanpa mengubah aturan penarikan, skor, atau room yang sudah berjalan.
 
 **Kamus terpisah (tidak tercampur):**
 - IND → `dictionary.ts` (KBBI v6.1.0, 123.463 kata, import statis ~1.5MB)

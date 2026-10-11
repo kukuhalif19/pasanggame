@@ -170,25 +170,26 @@ export const ENGLISH_TILE_DISTRIBUTION: { letter: string; value: number; count: 
   { letter: ' ', value: 0, count: 2 },
 ];
 
-// 100 Tiles Hybrid Distribution (Mix mode: balanced for both languages)
+// 120 Tiles Hybrid Distribution (Mix mode: 118 letters + 2 blanks).
+// Extra vowels/consonants keep both Indonesian and English words playable longer.
 export const HYBRID_TILE_DISTRIBUTION: { letter: string; value: number; count: number }[] = [
   // 1 Point — frekuensi tinggi di kedua bahasa
-  { letter: 'E', value: 1, count: 8 },
-  { letter: 'A', value: 1, count: 12 },
-  { letter: 'I', value: 1, count: 8 },
-  { letter: 'O', value: 1, count: 7 },
-  { letter: 'U', value: 1, count: 6 },
-  { letter: 'N', value: 1, count: 6 },
-  { letter: 'R', value: 1, count: 5 },
-  { letter: 'T', value: 1, count: 5 },
-  { letter: 'S', value: 1, count: 5 },
-  { letter: 'L', value: 1, count: 4 },
+  { letter: 'E', value: 1, count: 10 },
+  { letter: 'A', value: 1, count: 14 },
+  { letter: 'I', value: 1, count: 10 },
+  { letter: 'O', value: 1, count: 9 },
+  { letter: 'U', value: 1, count: 8 },
+  { letter: 'N', value: 1, count: 8 },
+  { letter: 'R', value: 1, count: 6 },
+  { letter: 'T', value: 1, count: 6 },
+  { letter: 'S', value: 1, count: 6 },
+  { letter: 'L', value: 1, count: 5 },
 
   // 2 Points
-  { letter: 'D', value: 2, count: 4 },
-  { letter: 'G', value: 2, count: 3 },
-  { letter: 'K', value: 2, count: 3 },
-  { letter: 'M', value: 2, count: 2 },
+  { letter: 'D', value: 2, count: 5 },
+  { letter: 'G', value: 2, count: 4 },
+  { letter: 'K', value: 2, count: 4 },
+  { letter: 'M', value: 2, count: 3 },
 
   // 3 Points
   { letter: 'B', value: 3, count: 2 },
